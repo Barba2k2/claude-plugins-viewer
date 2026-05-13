@@ -2,10 +2,7 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  removeMarketplaceAction,
-  updateMarketplaceAction,
-} from '../actions/marketplaces';
+import { removeMarketplaceAction, updateMarketplaceAction } from '../actions/marketplaces';
 import { useMarketplaceStore } from '@/lib/marketplaceStore';
 import type { MarketplaceEntry } from '@/lib/cli';
 
@@ -116,9 +113,7 @@ export function MarketplaceRow({ entry }: Props) {
         </div>
       </div>
       {entry.installLocation && (
-        <div className="break-all font-mono text-[10px] text-muted">
-          {entry.installLocation}
-        </div>
+        <div className="break-all font-mono text-[10px] text-muted">{entry.installLocation}</div>
       )}
       {updateError && (
         <pre className="max-h-24 overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">

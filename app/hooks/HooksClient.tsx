@@ -12,14 +12,8 @@ export function HooksClient({ hooks }: { hooks: HookRecord[] }) {
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
   const extraFilter = useResourceFilterStore((s) => s.extraFilter);
 
-  const plugins = useMemo(
-    () => [...new Set(hooks.map((h) => h.pluginId))].sort(),
-    [hooks],
-  );
-  const events = useMemo(
-    () => [...new Set(hooks.map((h) => h.event))].sort(),
-    [hooks],
-  );
+  const plugins = useMemo(() => [...new Set(hooks.map((h) => h.pluginId))].sort(), [hooks]);
+  const events = useMemo(() => [...new Set(hooks.map((h) => h.event))].sort(), [hooks]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

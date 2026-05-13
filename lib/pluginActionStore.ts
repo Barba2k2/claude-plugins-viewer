@@ -49,15 +49,11 @@ export const usePluginActionStore = create<PluginActionState>((set) => ({
 
   setUninstallPending: (id, v) =>
     set((s) => ({ uninstallPending: { ...s.uninstallPending, [id]: v } })),
-  setUninstallError: (id, v) =>
-    set((s) => ({ uninstallError: { ...s.uninstallError, [id]: v } })),
+  setUninstallError: (id, v) => set((s) => ({ uninstallError: { ...s.uninstallError, [id]: v } })),
   setConfirmingUninstall: (id, v) =>
     set((s) => ({ confirmingUninstall: { ...s.confirmingUninstall, [id]: v } })),
 
-  setUpdatePending: (id, v) =>
-    set((s) => ({ updatePending: { ...s.updatePending, [id]: v } })),
-  setUpdateError: (id, v) =>
-    set((s) => ({ updateError: { ...s.updateError, [id]: v } })),
-  setUpdateSuccess: (id, v) =>
-    set((s) => ({ updateSuccess: { ...s.updateSuccess, [id]: v } })),
+  setUpdatePending: (id, v) => set((s) => ({ updatePending: { ...s.updatePending, [id]: v } })),
+  setUpdateError: (id, v) => set((s) => ({ updateError: { ...s.updateError, [id]: v } })),
+  setUpdateSuccess: (id, v) => set((s) => ({ updateSuccess: { ...s.updateSuccess, [id]: v } })),
 }));

@@ -5,11 +5,7 @@ import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CommandDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function CommandDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const detail = await getCommandDetail(decodeURIComponent(id));
   if (!detail) return notFound();

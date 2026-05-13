@@ -43,12 +43,9 @@ export function AddMarketplace() {
       className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs uppercase tracking-wide text-muted">
-          Add marketplace
-        </label>
+        <label className="text-xs uppercase tracking-wide text-muted">Add marketplace</label>
         <span className="text-[10px] text-muted">
-          GitHub repo <code className="font-mono">owner/repo</code>, URL, or local
-          path
+          GitHub repo <code className="font-mono">owner/repo</code>, URL, or local path
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -57,7 +54,7 @@ export function AddMarketplace() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="e.g. anthropics/claude-plugins-official"
-          className="flex-1 min-w-[280px] rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm outline-none focus:border-accent"
+          className="min-w-[280px] flex-1 rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm outline-none focus:border-accent"
           disabled={pending}
         />
         <button

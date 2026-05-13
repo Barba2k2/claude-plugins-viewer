@@ -59,7 +59,7 @@ export function PluginGrid({ plugins }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, description, or keyword…"
-          className="flex-1 min-w-[240px] rounded-lg border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-accent"
+          className="min-w-[240px] flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-accent"
         />
         <select
           value={marketplace ?? ''}
