@@ -1,5 +1,6 @@
 import { getPlugins } from '@/lib/plugins';
 import { PluginGrid } from './PluginGrid';
+import { InstallPlugin } from './InstallPlugin';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,10 @@ export default async function HomePage() {
           {totals.commands} commands · {totals.hooks} hooks · {totals.mcps} MCP servers
         </p>
       </header>
+
+      <div className="mb-6">
+        <InstallPlugin />
+      </div>
 
       <PluginGrid plugins={plugins} />
 

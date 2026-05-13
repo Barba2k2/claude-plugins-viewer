@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { useFilterStore, type SortKey } from '@/lib/store';
 import type { PluginRecord } from '@/lib/plugins';
+import { PluginToggle } from './PluginToggle';
 
 type Props = {
   plugins: PluginRecord[];
@@ -101,12 +102,17 @@ export function PluginGrid({ plugins }: Props) {
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((p) => (
-            <li key={p.id}>
+            <li key={p.id} className="relative">
+              <div className="absolute right-4 top-4 z-10">
+                <PluginToggle id={p.id} enabled={p.enabled} />
+              </div>
               <Link
                 href={`/plugins/${encodeURIComponent(p.id)}`}
-                className="group flex h-full flex-col gap-3 rounded-xl border border-border bg-panel p-5 transition hover:border-accent"
+                className={`group flex h-full flex-col gap-3 rounded-xl border border-border bg-panel p-5 transition hover:border-accent ${
+                  p.enabled ? '' : 'opacity-60'
+                }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 pr-12">
                   <h3 className="text-base font-medium text-white group-hover:text-accent">
                     {p.name}
                   </h3>

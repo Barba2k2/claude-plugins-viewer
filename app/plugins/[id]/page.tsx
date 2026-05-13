@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPluginById, readPluginReadme } from '@/lib/plugins';
+import { PluginToggle } from '@/app/PluginToggle';
+import { UninstallPlugin } from '@/app/UninstallPlugin';
+import { UpdatePlugin } from '@/app/UpdatePlugin';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +31,10 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
           <h1 className="text-3xl font-semibold text-white">{plugin.name}</h1>
           <span className="rounded-full border border-border px-2 py-0.5 font-mono text-xs text-muted">
             v{plugin.version}
+          </span>
+          <span className="ml-auto flex items-center gap-2 text-xs text-muted">
+            {plugin.enabled ? 'Enabled' : 'Disabled'}
+            <PluginToggle id={plugin.id} enabled={plugin.enabled} size="md" />
           </span>
         </div>
         {plugin.description && <p className="text-base text-muted">{plugin.description}</p>}
@@ -60,6 +67,11 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
           )}
         </div>
       </header>
+
+      <section className="mb-8 flex flex-wrap justify-end gap-3">
+        <UpdatePlugin id={plugin.id} />
+        <UninstallPlugin id={plugin.id} name={plugin.name} />
+      </section>
 
       <section className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
         <StatCard label="Skills" value={plugin.counts.skills} />
