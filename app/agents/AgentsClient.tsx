@@ -12,10 +12,7 @@ export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
   const extraFilter = useResourceFilterStore((s) => s.extraFilter);
 
-  const plugins = useMemo(
-    () => [...new Set(agents.map((a) => a.pluginId))].sort(),
-    [agents],
-  );
+  const plugins = useMemo(() => [...new Set(agents.map((a) => a.pluginId))].sort(), [agents]);
 
   const models = useMemo(
     () => [...new Set(agents.map((a) => a.model).filter(Boolean) as string[])].sort(),
@@ -64,9 +61,7 @@ export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
                 }`}
               >
                 <div className="flex items-start justify-between gap-3 pr-10">
-                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
-                    {a.name}
-                  </h3>
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">{a.name}</h3>
                   <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
                     {a.pluginName}
                   </span>

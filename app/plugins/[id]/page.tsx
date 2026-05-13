@@ -87,9 +87,7 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
         <ResourceList title="Commands" items={plugin.resources.commands} />
         <ResourceList title="Hooks" items={plugin.resources.hooks} />
         <ResourceList title="MCP Servers" items={plugin.resources.mcps} />
-        {plugin.keywords.length > 0 && (
-          <ResourceList title="Keywords" items={plugin.keywords} />
-        )}
+        {plugin.keywords.length > 0 && <ResourceList title="Keywords" items={plugin.keywords} />}
       </section>
 
       <section className="mb-8 rounded-xl border border-border bg-panel p-5 text-sm">
@@ -98,9 +96,7 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
           <Info label="ID" value={plugin.id} />
           <Info label="Installed" value={fmtDate(plugin.installedAt)} />
           <Info label="Last updated" value={fmtDate(plugin.lastUpdated)} />
-          {plugin.gitCommitSha && (
-            <Info label="Commit" value={plugin.gitCommitSha.slice(0, 12)} />
-          )}
+          {plugin.gitCommitSha && <Info label="Commit" value={plugin.gitCommitSha.slice(0, 12)} />}
           <Info label="Path" value={plugin.installPath} wide />
         </dl>
       </section>

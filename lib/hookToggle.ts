@@ -48,9 +48,7 @@ async function writeShadow(s: Shadow): Promise<void> {
   await fs.rename(tmp, SHADOW_PATH);
 }
 
-export async function getShadowForPlugin(
-  pluginId: string,
-): Promise<Record<string, ShadowEntry>> {
+export async function getShadowForPlugin(pluginId: string): Promise<Record<string, ShadowEntry>> {
   const shadow = await readShadow();
   return shadow[pluginId] ?? {};
 }
@@ -106,10 +104,7 @@ function ensureWithin(parent: string, child: string): void {
   }
 }
 
-export async function disableHook(
-  pluginId: string,
-  stableId: string,
-): Promise<void> {
+export async function disableHook(pluginId: string, stableId: string): Promise<void> {
   const plugin = await getPluginById(pluginId);
   if (!plugin) throw new Error(`plugin not found: ${pluginId}`);
   const hooksFile = await locateHooksFile(plugin.installPath);
@@ -124,12 +119,7 @@ export async function disableHook(
     for (const entry of entries) {
       const remainingInner: HookInner[] = [];
       for (const inner of entry.hooks ?? []) {
-        const id = hookStableId(
-          pluginId,
-          event,
-          entry.matcher,
-          inner.command ?? '',
-        );
+        const id = hookStableId(pluginId, event, entry.matcher, inner.command ?? '');
         if (id === stableId && !found) {
           found = {
             event,
@@ -159,10 +149,7 @@ export async function disableHook(
   await writeShadow(shadow);
 }
 
-export async function enableHook(
-  pluginId: string,
-  stableId: string,
-): Promise<void> {
+export async function enableHook(pluginId: string, stableId: string): Promise<void> {
   const plugin = await getPluginById(pluginId);
   if (!plugin) throw new Error(`plugin not found: ${pluginId}`);
 
@@ -175,9 +162,7 @@ export async function enableHook(
   const data = await readHooksFile(hooksFile);
   data.hooks ??= {};
   data.hooks[entry.event] ??= [];
-  const existing = data.hooks[entry.event].find(
-    (e) => (e.matcher ?? '') === (entry.matcher ?? ''),
-  );
+  const existing = data.hooks[entry.event].find((e) => (e.matcher ?? '') === (entry.matcher ?? ''));
   const inner: HookInner = { type: entry.type, command: entry.command };
   if (existing) {
     existing.hooks ??= [];

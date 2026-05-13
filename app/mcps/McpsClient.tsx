@@ -12,14 +12,8 @@ export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
   const extraFilter = useResourceFilterStore((s) => s.extraFilter);
 
-  const plugins = useMemo(
-    () => [...new Set(mcps.map((m) => m.pluginId))].sort(),
-    [mcps],
-  );
-  const transports = useMemo(
-    () => [...new Set(mcps.map((m) => m.transport))].sort(),
-    [mcps],
-  );
+  const plugins = useMemo(() => [...new Set(mcps.map((m) => m.pluginId))].sort(), [mcps]);
+  const transports = useMemo(() => [...new Set(mcps.map((m) => m.transport))].sort(), [mcps]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -64,9 +58,7 @@ export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2 pr-12">
-                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
-                    {m.name}
-                  </h3>
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">{m.name}</h3>
                   <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[11px] text-accent">
                     {m.transport}
                   </span>
@@ -90,10 +82,7 @@ export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
                   <div className="flex flex-wrap gap-1.5 text-[10px]">
                     <span className="text-muted">env:</span>
                     {m.envKeys.map((k) => (
-                      <span
-                        key={k}
-                        className="rounded-full bg-bg px-2 py-0.5 font-mono text-muted"
-                      >
+                      <span key={k} className="rounded-full bg-bg px-2 py-0.5 font-mono text-muted">
                         {k}
                       </span>
                     ))}

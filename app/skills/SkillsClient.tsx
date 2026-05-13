@@ -11,10 +11,7 @@ export function SkillsClient({ skills }: { skills: SkillRecord[] }) {
   const query = useResourceFilterStore((s) => s.query);
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
 
-  const plugins = useMemo(
-    () => [...new Set(skills.map((s) => s.pluginId))].sort(),
-    [skills],
-  );
+  const plugins = useMemo(() => [...new Set(skills.map((s) => s.pluginId))].sort(), [skills]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -55,9 +52,7 @@ export function SkillsClient({ skills }: { skills: SkillRecord[] }) {
                 }`}
               >
                 <div className="flex items-start justify-between gap-3 pr-10">
-                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
-                    {s.name}
-                  </h3>
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">{s.name}</h3>
                   <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
                     {s.pluginName}
                   </span>

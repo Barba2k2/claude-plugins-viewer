@@ -43,9 +43,7 @@ export function InstallPlugin() {
       className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs uppercase tracking-wide text-muted">
-          Install plugin
-        </label>
+        <label className="text-xs uppercase tracking-wide text-muted">Install plugin</label>
         <span className="text-[10px] text-muted">
           format: <code className="font-mono">name@marketplace</code>
         </span>
@@ -56,7 +54,7 @@ export function InstallPlugin() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="e.g. context7@claude-plugins-official"
-          className="flex-1 min-w-[240px] rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm outline-none focus:border-accent"
+          className="min-w-[240px] flex-1 rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm outline-none focus:border-accent"
           disabled={pending}
         />
         <button

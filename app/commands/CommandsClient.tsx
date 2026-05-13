@@ -11,10 +11,7 @@ export function CommandsClient({ commands }: { commands: CommandRecord[] }) {
   const query = useResourceFilterStore((s) => s.query);
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
 
-  const plugins = useMemo(
-    () => [...new Set(commands.map((c) => c.pluginId))].sort(),
-    [commands],
-  );
+  const plugins = useMemo(() => [...new Set(commands.map((c) => c.pluginId))].sort(), [commands]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

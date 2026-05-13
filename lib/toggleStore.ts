@@ -14,12 +14,9 @@ export const useToggleStore = create<ToggleState>((set) => ({
   optimistic: {},
   pending: {},
   errors: {},
-  setOptimistic: (key, value) =>
-    set((s) => ({ optimistic: { ...s.optimistic, [key]: value } })),
-  setPending: (key, value) =>
-    set((s) => ({ pending: { ...s.pending, [key]: value } })),
-  setError: (key, value) =>
-    set((s) => ({ errors: { ...s.errors, [key]: value } })),
+  setOptimistic: (key, value) => set((s) => ({ optimistic: { ...s.optimistic, [key]: value } })),
+  setPending: (key, value) => set((s) => ({ pending: { ...s.pending, [key]: value } })),
+  setError: (key, value) => set((s) => ({ errors: { ...s.errors, [key]: value } })),
   clear: (key) =>
     set((s) => {
       const nextO = { ...s.optimistic };

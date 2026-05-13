@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { cache } from 'react';
 import { getPluginById, getPlugins, type PluginRecord } from './plugins';
 import { getDisabledMcps } from './settings';
 import { getShadowForPlugin, hookStableId } from './hookToggle';
@@ -122,33 +123,34 @@ async function safeListDir(p: string): Promise<string[]> {
 async function readSkillsFromPlugin(plugin: PluginRecord): Promise<SkillRecord[]> {
   const skillsDir = path.join(plugin.installPath, 'skills');
   const names = await safeListDir(skillsDir);
-  const out: SkillRecord[] = [];
-  for (const name of names) {
-    const enabledPath = path.join(skillsDir, name, 'SKILL.md');
-    const disabledPath = path.join(skillsDir, name, 'SKILL.md.disabled');
-    let raw = await safeRead(enabledPath);
-    let enabled = true;
-    let activePath = enabledPath;
-    if (!raw) {
-      raw = await safeRead(disabledPath);
-      if (!raw) continue;
-      enabled = false;
-      activePath = disabledPath;
-    }
-    const { data } = parseFrontmatter(raw);
-    out.push({
-      id: `${plugin.id}::${name}`,
-      name: data.name || name,
-      description: data.description || '',
-      pluginId: plugin.id,
-      pluginName: plugin.name,
-      marketplace: plugin.marketplace,
-      path: activePath,
-      dirName: name,
-      enabled,
-    });
-  }
-  return out;
+  const results = await Promise.all(
+    names.map(async (name) => {
+      const enabledPath = path.join(skillsDir, name, 'SKILL.md');
+      const disabledPath = path.join(skillsDir, name, 'SKILL.md.disabled');
+      let raw = await safeRead(enabledPath);
+      let enabled = true;
+      let activePath = enabledPath;
+      if (!raw) {
+        raw = await safeRead(disabledPath);
+        if (!raw) return null;
+        enabled = false;
+        activePath = disabledPath;
+      }
+      const { data } = parseFrontmatter(raw);
+      return {
+        id: `${plugin.id}::${name}`,
+        name: data.name || name,
+        description: data.description || '',
+        pluginId: plugin.id,
+        pluginName: plugin.name,
+        marketplace: plugin.marketplace,
+        path: activePath,
+        dirName: name,
+        enabled,
+      } as SkillRecord;
+    }),
+  );
+  return results.filter((r): r is SkillRecord => r !== null);
 }
 
 async function readAgentsFromPlugin(plugin: PluginRecord): Promise<AgentRecord[]> {
@@ -156,30 +158,31 @@ async function readAgentsFromPlugin(plugin: PluginRecord): Promise<AgentRecord[]
   const files = (await safeListDir(agentsDir)).filter(
     (f) => f.endsWith('.md') || f.endsWith('.md.disabled'),
   );
-  const out: AgentRecord[] = [];
-  for (const file of files) {
-    const enabled = file.endsWith('.md');
-    const base = file.replace(/\.md(\.disabled)?$/, '');
-    const full = path.join(agentsDir, file);
-    const raw = await safeRead(full);
-    if (!raw) continue;
-    const { data } = parseFrontmatter(raw);
-    out.push({
-      id: `${plugin.id}::${base}`,
-      name: data.name || base,
-      description: data.description || '',
-      model: data.model,
-      color: data.color,
-      tools: data.tools,
-      pluginId: plugin.id,
-      pluginName: plugin.name,
-      marketplace: plugin.marketplace,
-      path: full,
-      fileName: file,
-      enabled,
-    });
-  }
-  return out;
+  const results = await Promise.all(
+    files.map(async (file) => {
+      const enabled = file.endsWith('.md');
+      const base = file.replace(/\.md(\.disabled)?$/, '');
+      const full = path.join(agentsDir, file);
+      const raw = await safeRead(full);
+      if (!raw) return null;
+      const { data } = parseFrontmatter(raw);
+      return {
+        id: `${plugin.id}::${base}`,
+        name: data.name || base,
+        description: data.description || '',
+        model: data.model,
+        color: data.color,
+        tools: data.tools,
+        pluginId: plugin.id,
+        pluginName: plugin.name,
+        marketplace: plugin.marketplace,
+        path: full,
+        fileName: file,
+        enabled,
+      } as AgentRecord;
+    }),
+  );
+  return results.filter((r): r is AgentRecord => r !== null);
 }
 
 async function readCommandsFromPlugin(plugin: PluginRecord): Promise<CommandRecord[]> {
@@ -187,28 +190,29 @@ async function readCommandsFromPlugin(plugin: PluginRecord): Promise<CommandReco
   const files = (await safeListDir(dir)).filter(
     (f) => f.endsWith('.md') || f.endsWith('.md.disabled'),
   );
-  const out: CommandRecord[] = [];
-  for (const file of files) {
-    const enabled = file.endsWith('.md');
-    const base = file.replace(/\.md(\.disabled)?$/, '');
-    const full = path.join(dir, file);
-    const raw = await safeRead(full);
-    if (!raw) continue;
-    const { data } = parseFrontmatter(raw);
-    out.push({
-      id: `${plugin.id}::${base}`,
-      name: base,
-      description: data.description || '',
-      argumentHint: data['argument-hint'],
-      pluginId: plugin.id,
-      pluginName: plugin.name,
-      marketplace: plugin.marketplace,
-      path: full,
-      fileName: file,
-      enabled,
-    });
-  }
-  return out;
+  const results = await Promise.all(
+    files.map(async (file) => {
+      const enabled = file.endsWith('.md');
+      const base = file.replace(/\.md(\.disabled)?$/, '');
+      const full = path.join(dir, file);
+      const raw = await safeRead(full);
+      if (!raw) return null;
+      const { data } = parseFrontmatter(raw);
+      return {
+        id: `${plugin.id}::${base}`,
+        name: base,
+        description: data.description || '',
+        argumentHint: data['argument-hint'],
+        pluginId: plugin.id,
+        pluginName: plugin.name,
+        marketplace: plugin.marketplace,
+        path: full,
+        fileName: file,
+        enabled,
+      } as CommandRecord;
+    }),
+  );
+  return results.filter((r): r is CommandRecord => r !== null);
 }
 
 type HookEntry = {
@@ -289,7 +293,11 @@ async function readMcpsFromPlugin(
     if (!raw) return;
     try {
       const json = JSON.parse(raw) as { mcpServers?: unknown };
-      if (json.mcpServers && typeof json.mcpServers === 'object' && !Array.isArray(json.mcpServers)) {
+      if (
+        json.mcpServers &&
+        typeof json.mcpServers === 'object' &&
+        !Array.isArray(json.mcpServers)
+      ) {
         sources.push(json.mcpServers as Record<string, McpServerDef>);
       }
     } catch {
@@ -353,38 +361,38 @@ async function readMcpsFromPlugin(
   return out;
 }
 
-export async function getAllSkills(): Promise<SkillRecord[]> {
+export const getAllSkills = cache(async (): Promise<SkillRecord[]> => {
   const plugins = await getPlugins();
   const all = (await Promise.all(plugins.map(readSkillsFromPlugin))).flat();
   return all.sort((a, b) => a.name.localeCompare(b.name));
-}
+});
 
-export async function getAllAgents(): Promise<AgentRecord[]> {
+export const getAllAgents = cache(async (): Promise<AgentRecord[]> => {
   const plugins = await getPlugins();
   const all = (await Promise.all(plugins.map(readAgentsFromPlugin))).flat();
   return all.sort((a, b) => a.name.localeCompare(b.name));
-}
+});
 
-export async function getAllCommands(): Promise<CommandRecord[]> {
+export const getAllCommands = cache(async (): Promise<CommandRecord[]> => {
   const plugins = await getPlugins();
   const all = (await Promise.all(plugins.map(readCommandsFromPlugin))).flat();
   return all.sort((a, b) => a.name.localeCompare(b.name));
-}
+});
 
-export async function getAllHooks(): Promise<HookRecord[]> {
+export const getAllHooks = cache(async (): Promise<HookRecord[]> => {
   const plugins = await getPlugins();
   const all = (await Promise.all(plugins.map(readHooksFromPlugin))).flat();
-  return all.sort((a, b) => a.event.localeCompare(b.event) || a.pluginName.localeCompare(b.pluginName));
-}
+  return all.sort(
+    (a, b) => a.event.localeCompare(b.event) || a.pluginName.localeCompare(b.pluginName),
+  );
+});
 
-export async function getAllMcps(): Promise<McpRecord[]> {
+export const getAllMcps = cache(async (): Promise<McpRecord[]> => {
   const plugins = await getPlugins();
   const disabledSet = new Set(await getDisabledMcps());
-  const all = (
-    await Promise.all(plugins.map((p) => readMcpsFromPlugin(p, disabledSet)))
-  ).flat();
+  const all = (await Promise.all(plugins.map((p) => readMcpsFromPlugin(p, disabledSet)))).flat();
   return all.sort((a, b) => a.name.localeCompare(b.name));
-}
+});
 
 export async function getSkillDetail(
   id: string,

@@ -47,17 +47,12 @@ export const useMarketplaceStore = create<MarketplaceState>((set) => ({
   setAddError: (v) => set({ addError: v }),
   setAddSuccess: (v) => set({ addSuccess: v }),
 
-  setRemovePending: (id, v) =>
-    set((s) => ({ removePending: { ...s.removePending, [id]: v } })),
-  setRemoveError: (id, v) =>
-    set((s) => ({ removeError: { ...s.removeError, [id]: v } })),
+  setRemovePending: (id, v) => set((s) => ({ removePending: { ...s.removePending, [id]: v } })),
+  setRemoveError: (id, v) => set((s) => ({ removeError: { ...s.removeError, [id]: v } })),
   setConfirmingRemove: (id, v) =>
     set((s) => ({ confirmingRemove: { ...s.confirmingRemove, [id]: v } })),
 
-  setUpdatePending: (id, v) =>
-    set((s) => ({ updatePending: { ...s.updatePending, [id]: v } })),
-  setUpdateError: (id, v) =>
-    set((s) => ({ updateError: { ...s.updateError, [id]: v } })),
-  setUpdateSuccess: (id, v) =>
-    set((s) => ({ updateSuccess: { ...s.updateSuccess, [id]: v } })),
+  setUpdatePending: (id, v) => set((s) => ({ updatePending: { ...s.updatePending, [id]: v } })),
+  setUpdateError: (id, v) => set((s) => ({ updateError: { ...s.updateError, [id]: v } })),
+  setUpdateSuccess: (id, v) => set((s) => ({ updateSuccess: { ...s.updateSuccess, [id]: v } })),
 }));

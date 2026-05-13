@@ -10,8 +10,7 @@ export default async function CommandsPage() {
       <header className="mb-6 flex flex-col gap-1">
         <h1 className="text-2xl font-semibold text-white">Slash Commands</h1>
         <p className="text-sm text-muted">
-          {commands.length} commands across{' '}
-          {new Set(commands.map((c) => c.pluginId)).size} plugins
+          {commands.length} commands across {new Set(commands.map((c) => c.pluginId)).size} plugins
         </p>
       </header>
       <CommandsClient commands={commands} />

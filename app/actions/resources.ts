@@ -13,11 +13,7 @@ export type ActionResult = { success: true } | { success: false; error: string }
 
 type Kind = 'skill' | 'agent' | 'command';
 
-async function applyToggle(
-  kind: Kind,
-  id: string,
-  enabled: boolean,
-): Promise<ActionResult> {
+async function applyToggle(kind: Kind, id: string, enabled: boolean): Promise<ActionResult> {
   const parsed = parseResourceId(id);
   if (!parsed) return { success: false, error: `invalid id: ${id}` };
   try {

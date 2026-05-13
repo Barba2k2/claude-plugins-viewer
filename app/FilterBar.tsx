@@ -11,14 +11,7 @@ type Props = {
   placeholder?: string;
 };
 
-export function FilterBar({
-  plugins,
-  total,
-  shown,
-  extraLabel,
-  extraOptions,
-  placeholder,
-}: Props) {
+export function FilterBar({ plugins, total, shown, extraLabel, extraOptions, placeholder }: Props) {
   const query = useResourceFilterStore((s) => s.query);
   const pluginFilter = useResourceFilterStore((s) => s.pluginFilter);
   const extraFilter = useResourceFilterStore((s) => s.extraFilter);
@@ -34,7 +27,7 @@ export function FilterBar({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder ?? 'Search name or description…'}
-        className="flex-1 min-w-[240px] rounded-lg border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-accent"
+        className="min-w-[240px] flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm outline-none focus:border-accent"
       />
       <select
         value={pluginFilter ?? ''}

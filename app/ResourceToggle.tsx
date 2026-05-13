@@ -13,7 +13,10 @@ type Props = {
   size?: 'sm' | 'md';
 };
 
-const TOGGLERS: Record<Kind, (id: string, enabled: boolean) => Promise<{ success: true } | { success: false; error: string }>> = {
+const TOGGLERS: Record<
+  Kind,
+  (id: string, enabled: boolean) => Promise<{ success: true } | { success: false; error: string }>
+> = {
   skill: toggleSkill,
   agent: toggleAgent,
   command: toggleCommand,

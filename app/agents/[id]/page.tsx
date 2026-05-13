@@ -5,11 +5,7 @@ import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AgentDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function AgentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const detail = await getAgentDetail(decodeURIComponent(id));
   if (!detail) return notFound();
@@ -74,7 +70,9 @@ function Stat({ label, value, truncate }: { label: string; value: string; trunca
   return (
     <div className="rounded-xl border border-border bg-panel p-3">
       <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
-      <div className={`mt-1 font-mono text-xs text-white ${truncate ? 'truncate' : ''}`}>{value}</div>
+      <div className={`mt-1 font-mono text-xs text-white ${truncate ? 'truncate' : ''}`}>
+        {value}
+      </div>
     </div>
   );
 }

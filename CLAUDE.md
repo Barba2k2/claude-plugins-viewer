@@ -13,9 +13,10 @@ No test framework is configured; verify changes with `npm run lint` + `npm run b
 
 ## Architecture
 
-Next.js 15 App Router dashboard (React 19, TypeScript strict, Tailwind, Zustand) that introspects locally installed Claude Code plugins by reading the user's `~/.claude/plugins/` directory at request time. There is no database and no API layer — the filesystem *is* the data source.
+Next.js 15 App Router dashboard (React 19, TypeScript strict, Tailwind, Zustand) that introspects locally installed Claude Code plugins by reading the user's `~/.claude/plugins/` directory at request time. There is no database and no API layer — the filesystem _is_ the data source.
 
 **Data flow:** Server Components in `app/` call readers in `lib/plugins.ts` (`getPlugins`, `getPluginById`) and `lib/resources.ts` (`getSkills`, `getAgents`, `getCommands`, `getHooks`, `getMcps` and their `*ById` variants). These readers:
+
 1. Parse `~/.claude/plugins/installed_plugins.json` to enumerate installed plugins.
 2. For each plugin, walk its `installPath` to load `plugin.json`/`manifest.json`, README, and the per-resource directories (`skills/`, `agents/`, `commands/`, `hooks/`, `.mcp.json`).
 3. Return typed `PluginRecord` / `SkillRecord` / `AgentRecord` / `CommandRecord` / `HookRecord` / `McpRecord` shapes consumed directly by Server Components.
@@ -23,6 +24,7 @@ Next.js 15 App Router dashboard (React 19, TypeScript strict, Tailwind, Zustand)
 Because reads happen per request, installing/uninstalling a plugin is reflected on page reload — do not cache plugin data across requests.
 
 **Routing:** Each resource type has both a list page and a detail page:
+
 - `app/page.tsx` — plugin dashboard (uses `app/PluginGrid.tsx` client component)
 - `app/plugins/[id]/page.tsx` — plugin detail
 - `app/{skills,agents,commands,hooks,mcps}/page.tsx` — flat lists across all plugins
