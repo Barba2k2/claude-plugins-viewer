@@ -52,35 +52,38 @@ export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((a) => (
-            <li
-              key={a.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-mono text-sm text-white">{a.name}</h3>
-                <Link
-                  href={`/plugins/${encodeURIComponent(a.pluginId)}`}
-                  className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:text-accent"
-                >
-                  {a.pluginName}
-                </Link>
-              </div>
-              <p className="line-clamp-3 text-xs text-muted">
-                {a.description || <span className="italic">no description</span>}
-              </p>
-              <div className="flex flex-wrap gap-1.5 text-[10px] text-muted">
-                {a.model && (
-                  <span className="rounded-full bg-bg px-2 py-0.5 font-mono">model: {a.model}</span>
-                )}
-                {a.color && (
-                  <span className="rounded-full bg-bg px-2 py-0.5 font-mono">{a.color}</span>
-                )}
-                {a.tools && (
-                  <span className="rounded-full bg-bg px-2 py-0.5 font-mono">
-                    tools: {a.tools.length > 32 ? a.tools.slice(0, 32) + '…' : a.tools}
+            <li key={a.id}>
+              <Link
+                href={`/agents/${encodeURIComponent(a.id)}`}
+                className="group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
+                    {a.name}
+                  </h3>
+                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                    {a.pluginName}
                   </span>
-                )}
-              </div>
+                </div>
+                <p className="line-clamp-3 text-xs text-muted">
+                  {a.description || <span className="italic">no description</span>}
+                </p>
+                <div className="flex flex-wrap gap-1.5 text-[10px] text-muted">
+                  {a.model && (
+                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">
+                      model: {a.model}
+                    </span>
+                  )}
+                  {a.color && (
+                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">{a.color}</span>
+                  )}
+                  {a.tools && (
+                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">
+                      tools: {a.tools.length > 32 ? a.tools.slice(0, 32) + '…' : a.tools}
+                    </span>
+                  )}
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
