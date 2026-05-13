@@ -52,32 +52,31 @@ export function HooksClient({ hooks }: { hooks: HookRecord[] }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {filtered.map((h) => (
-            <li
-              key={h.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-xs text-accent">
-                  {h.event}
-                </span>
-                {h.matcher && (
-                  <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-muted">
-                    matcher: {h.matcher}
+            <li key={h.id}>
+              <Link
+                href={`/hooks/${encodeURIComponent(h.id)}`}
+                className="group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-xs text-accent">
+                    {h.event}
                   </span>
-                )}
-                <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-muted">
-                  type: {h.type}
-                </span>
-                <Link
-                  href={`/plugins/${encodeURIComponent(h.pluginId)}`}
-                  className="ml-auto rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:text-accent"
-                >
-                  {h.pluginName}
-                </Link>
-              </div>
-              <code className="break-all rounded-lg bg-bg p-3 font-mono text-xs text-white">
-                {h.command}
-              </code>
+                  {h.matcher && (
+                    <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-muted">
+                      matcher: {h.matcher}
+                    </span>
+                  )}
+                  <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[11px] text-muted">
+                    type: {h.type}
+                  </span>
+                  <span className="ml-auto rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                    {h.pluginName}
+                  </span>
+                </div>
+                <code className="break-all rounded-lg bg-bg p-3 font-mono text-xs text-white">
+                  {h.command}
+                </code>
+              </Link>
             </li>
           ))}
         </ul>
