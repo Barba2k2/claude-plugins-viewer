@@ -43,27 +43,26 @@ export function CommandsClient({ commands }: { commands: CommandRecord[] }) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((c) => (
-            <li
-              key={c.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-mono text-sm text-accent">/{c.name}</h3>
-                <Link
-                  href={`/plugins/${encodeURIComponent(c.pluginId)}`}
-                  className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:text-accent"
-                >
-                  {c.pluginName}
-                </Link>
-              </div>
-              <p className="line-clamp-3 text-xs text-muted">
-                {c.description || <span className="italic">no description</span>}
-              </p>
-              {c.argumentHint && (
-                <span className="w-fit rounded-full bg-bg px-2 py-0.5 font-mono text-[10px] text-muted">
-                  args: {c.argumentHint}
-                </span>
-              )}
+            <li key={c.id}>
+              <Link
+                href={`/commands/${encodeURIComponent(c.id)}`}
+                className="group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-mono text-sm text-accent">/{c.name}</h3>
+                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                    {c.pluginName}
+                  </span>
+                </div>
+                <p className="line-clamp-3 text-xs text-muted">
+                  {c.description || <span className="italic">no description</span>}
+                </p>
+                {c.argumentHint && (
+                  <span className="w-fit rounded-full bg-bg px-2 py-0.5 font-mono text-[10px] text-muted">
+                    args: {c.argumentHint}
+                  </span>
+                )}
+              </Link>
             </li>
           ))}
         </ul>
