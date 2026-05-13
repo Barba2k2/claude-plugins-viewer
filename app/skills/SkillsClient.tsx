@@ -43,22 +43,23 @@ export function SkillsClient({ skills }: { skills: SkillRecord[] }) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((s) => (
-            <li
-              key={s.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <h3 className="font-mono text-sm text-white">{s.name}</h3>
-                <Link
-                  href={`/plugins/${encodeURIComponent(s.pluginId)}`}
-                  className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:text-accent"
-                >
-                  {s.pluginName}
-                </Link>
-              </div>
-              <p className="line-clamp-3 text-xs text-muted">
-                {s.description || <span className="italic">no description</span>}
-              </p>
+            <li key={s.id}>
+              <Link
+                href={`/skills/${encodeURIComponent(s.id)}`}
+                className="group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
+                    {s.name}
+                  </h3>
+                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                    {s.pluginName}
+                  </span>
+                </div>
+                <p className="line-clamp-3 text-xs text-muted">
+                  {s.description || <span className="italic">no description</span>}
+                </p>
+              </Link>
             </li>
           ))}
         </ul>
