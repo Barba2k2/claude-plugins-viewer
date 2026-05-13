@@ -234,28 +234,41 @@ type McpServerDef = {
 
 async function readMcpsFromPlugin(plugin: PluginRecord): Promise<McpRecord[]> {
   const sources: Array<Record<string, McpServerDef>> = [];
+  const tryFile = async (file: string) => {
+    const raw = await safeRead(file);
+    if (!raw) return;
+    try {
+      const json = JSON.parse(raw) as { mcpServers?: unknown };
+      if (json.mcpServers && typeof json.mcpServers === 'object' && !Array.isArray(json.mcpServers)) {
+        sources.push(json.mcpServers as Record<string, McpServerDef>);
+      }
+    } catch {
+      // ignore
+    }
+  };
 
-  const manifestRaw = await safeRead(
-    path.join(plugin.installPath, '.claude-plugin', 'plugin.json'),
-  );
+  const manifestPath = path.join(plugin.installPath, '.claude-plugin', 'plugin.json');
+  const manifestRaw = await safeRead(manifestPath);
   if (manifestRaw) {
     try {
-      const json = JSON.parse(manifestRaw) as { mcpServers?: Record<string, McpServerDef> };
-      if (json.mcpServers) sources.push(json.mcpServers);
+      const json = JSON.parse(manifestRaw) as { mcpServers?: unknown };
+      if (typeof json.mcpServers === 'string') {
+        // Indirect reference: resolve path relative to plugin root
+        const referenced = path.resolve(plugin.installPath, json.mcpServers);
+        await tryFile(referenced);
+      } else if (
+        json.mcpServers &&
+        typeof json.mcpServers === 'object' &&
+        !Array.isArray(json.mcpServers)
+      ) {
+        sources.push(json.mcpServers as Record<string, McpServerDef>);
+      }
     } catch {
       // ignore
     }
   }
 
-  const dotMcp = await safeRead(path.join(plugin.installPath, '.mcp.json'));
-  if (dotMcp) {
-    try {
-      const json = JSON.parse(dotMcp) as { mcpServers?: Record<string, McpServerDef> };
-      if (json.mcpServers) sources.push(json.mcpServers);
-    } catch {
-      // ignore
-    }
-  }
+  await tryFile(path.join(plugin.installPath, '.mcp.json'));
 
   const merged = new Map<string, McpServerDef>();
   for (const src of sources) {

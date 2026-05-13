@@ -87,16 +87,34 @@ async function exists(p: string): Promise<boolean> {
 }
 
 async function countMcpServers(installPath: string): Promise<{ count: number; names: string[] }> {
-  const manifestPath = path.join(installPath, '.claude-plugin', 'plugin.json');
-  const mcpFile = path.join(installPath, '.mcp.json');
   const names = new Set<string>();
-  const manifest = await readJson<Record<string, unknown>>(manifestPath);
-  if (manifest && typeof manifest === 'object' && 'mcpServers' in manifest) {
-    const m = manifest.mcpServers as Record<string, unknown> | undefined;
-    if (m) Object.keys(m).forEach((k) => names.add(k));
+  const addFromFile = async (file: string) => {
+    const json = await readJson<{ mcpServers?: unknown }>(file);
+    if (
+      json?.mcpServers &&
+      typeof json.mcpServers === 'object' &&
+      !Array.isArray(json.mcpServers)
+    ) {
+      Object.keys(json.mcpServers as Record<string, unknown>).forEach((k) => names.add(k));
+    }
+  };
+
+  const manifest = await readJson<{ mcpServers?: unknown }>(
+    path.join(installPath, '.claude-plugin', 'plugin.json'),
+  );
+  if (manifest) {
+    if (typeof manifest.mcpServers === 'string') {
+      await addFromFile(path.resolve(installPath, manifest.mcpServers));
+    } else if (
+      manifest.mcpServers &&
+      typeof manifest.mcpServers === 'object' &&
+      !Array.isArray(manifest.mcpServers)
+    ) {
+      Object.keys(manifest.mcpServers as Record<string, unknown>).forEach((k) => names.add(k));
+    }
   }
-  const mcp = await readJson<{ mcpServers?: Record<string, unknown> }>(mcpFile);
-  if (mcp?.mcpServers) Object.keys(mcp.mcpServers).forEach((k) => names.add(k));
+
+  await addFromFile(path.join(installPath, '.mcp.json'));
   return { count: names.size, names: [...names] };
 }
 
