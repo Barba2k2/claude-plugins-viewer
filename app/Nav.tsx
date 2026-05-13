@@ -10,6 +10,7 @@ const TABS: Array<{ href: string; label: string }> = [
   { href: '/commands', label: 'Commands' },
   { href: '/hooks', label: 'Hooks' },
   { href: '/mcps', label: 'MCP Servers' },
+  { href: '/marketplaces', label: 'Marketplaces' },
 ];
 
 export function Nav() {
