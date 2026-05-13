@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useResourceFilterStore } from '@/lib/resourceStore';
 import { FilterBar } from '../FilterBar';
+import { McpToggle } from '../McpToggle';
 import type { McpRecord } from '@/lib/resources';
 
 export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
@@ -52,19 +53,24 @@ export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {filtered.map((m) => (
-            <li key={m.id}>
+            <li key={m.id} className="relative">
+              <div className="absolute right-4 top-4 z-10">
+                <McpToggle name={m.name} enabled={m.enabled} />
+              </div>
               <Link
                 href={`/mcps/${encodeURIComponent(m.id)}`}
-                className="group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+                className={`group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent ${
+                  m.enabled ? '' : 'opacity-60'
+                }`}
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 pr-12">
                   <h3 className="font-mono text-sm text-white group-hover:text-accent">
                     {m.name}
                   </h3>
                   <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[11px] text-accent">
                     {m.transport}
                   </span>
-                  <span className="ml-auto rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                  <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
                     {m.pluginName}
                   </span>
                 </div>

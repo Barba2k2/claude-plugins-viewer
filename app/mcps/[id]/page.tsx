@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getMcpDetail } from '@/lib/resources';
 import { DetailHeader } from '../../DetailHeader';
+import { McpToggle } from '../../McpToggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,20 @@ export default async function McpDetailPage({
         title={record.name}
         badge={record.transport}
       />
+
+      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
+        <div className="flex items-center gap-3 text-sm">
+          <span className={record.enabled ? 'text-white' : 'text-muted'}>
+            {record.enabled ? 'Enabled' : 'Disabled'}
+          </span>
+          <span className="text-xs text-muted">
+            {record.enabled
+              ? 'MCP server is active in Claude Code'
+              : 'MCP server is disabled in settings.json'}
+          </span>
+        </div>
+        <McpToggle name={record.name} enabled={record.enabled} size="md" />
+      </section>
 
       <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <Stat label="Transport" value={record.transport} />
