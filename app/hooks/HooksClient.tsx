@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useResourceFilterStore } from '@/lib/resourceStore';
 import { FilterBar } from '../FilterBar';
+import { ResourceToggle } from '../ResourceToggle';
 import type { HookRecord } from '@/lib/resources';
 
 export function HooksClient({ hooks }: { hooks: HookRecord[] }) {
@@ -52,12 +53,17 @@ export function HooksClient({ hooks }: { hooks: HookRecord[] }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {filtered.map((h) => (
-            <li key={h.id}>
+            <li key={h.id} className="relative">
+              <div className="absolute right-3 top-3 z-10">
+                <ResourceToggle kind="hook" id={h.id} enabled={h.enabled} />
+              </div>
               <Link
                 href={`/hooks/${encodeURIComponent(h.id)}`}
-                className="group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+                className={`group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent ${
+                  h.enabled ? '' : 'opacity-60'
+                }`}
               >
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 pr-10">
                   <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-xs text-accent">
                     {h.event}
                   </span>

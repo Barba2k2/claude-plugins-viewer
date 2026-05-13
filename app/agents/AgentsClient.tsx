@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useResourceFilterStore } from '@/lib/resourceStore';
 import { FilterBar } from '../FilterBar';
+import { ResourceToggle } from '../ResourceToggle';
 import type { AgentRecord } from '@/lib/resources';
 
 export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
@@ -52,12 +53,17 @@ export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((a) => (
-            <li key={a.id}>
+            <li key={a.id} className="relative">
+              <div className="absolute right-3 top-3 z-10">
+                <ResourceToggle kind="agent" id={a.id} enabled={a.enabled} />
+              </div>
               <Link
                 href={`/agents/${encodeURIComponent(a.id)}`}
-                className="group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+                className={`group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent ${
+                  a.enabled ? '' : 'opacity-60'
+                }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 pr-10">
                   <h3 className="font-mono text-sm text-white group-hover:text-accent">
                     {a.name}
                   </h3>

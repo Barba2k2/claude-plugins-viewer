@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getSkillDetail } from '@/lib/resources';
 import { DetailHeader } from '../../DetailHeader';
+import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,13 @@ export default async function SkillDetailPage({
         badge="skill"
         description={record.description}
       />
+
+      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
+        <span className={`text-sm ${record.enabled ? 'text-white' : 'text-muted'}`}>
+          {record.enabled ? 'Enabled' : 'Disabled (SKILL.md.disabled)'}
+        </span>
+        <ResourceToggle kind="skill" id={record.id} enabled={record.enabled} size="md" />
+      </section>
 
       {otherFrontmatter.length > 0 && (
         <section className="mb-6 rounded-xl border border-border bg-panel p-5">

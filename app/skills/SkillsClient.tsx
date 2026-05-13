@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useResourceFilterStore } from '@/lib/resourceStore';
 import { FilterBar } from '../FilterBar';
+import { ResourceToggle } from '../ResourceToggle';
 import type { SkillRecord } from '@/lib/resources';
 
 export function SkillsClient({ skills }: { skills: SkillRecord[] }) {
@@ -43,12 +44,17 @@ export function SkillsClient({ skills }: { skills: SkillRecord[] }) {
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((s) => (
-            <li key={s.id}>
+            <li key={s.id} className="relative">
+              <div className="absolute right-3 top-3 z-10">
+                <ResourceToggle kind="skill" id={s.id} enabled={s.enabled} />
+              </div>
               <Link
                 href={`/skills/${encodeURIComponent(s.id)}`}
-                className="group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+                className={`group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent ${
+                  s.enabled ? '' : 'opacity-60'
+                }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-3 pr-10">
                   <h3 className="font-mono text-sm text-white group-hover:text-accent">
                     {s.name}
                   </h3>

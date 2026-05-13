@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getHookDetail } from '@/lib/resources';
 import { DetailHeader } from '../../DetailHeader';
+import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,13 @@ export default async function HookDetailPage({
         badge="hook"
         description={record.matcher ? `Triggered when matcher = "${record.matcher}"` : undefined}
       />
+
+      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
+        <span className={`text-sm ${record.enabled ? 'text-white' : 'text-muted'}`}>
+          {record.enabled ? 'Enabled' : 'Disabled (stashed in viewer shadow)'}
+        </span>
+        <ResourceToggle kind="hook" id={record.id} enabled={record.enabled} size="md" />
+      </section>
 
       <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <Stat label="Event" value={record.event} />

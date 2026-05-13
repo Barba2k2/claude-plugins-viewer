@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getCommandDetail } from '@/lib/resources';
 import { DetailHeader } from '../../DetailHeader';
+import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,13 @@ export default async function CommandDetailPage({
         badge="command"
         description={record.description}
       />
+
+      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
+        <span className={`text-sm ${record.enabled ? 'text-white' : 'text-muted'}`}>
+          {record.enabled ? 'Enabled' : 'Disabled (.md.disabled)'}
+        </span>
+        <ResourceToggle kind="command" id={record.id} enabled={record.enabled} size="md" />
+      </section>
 
       {record.argumentHint && (
         <section className="mb-6 rounded-xl border border-border bg-panel p-4">

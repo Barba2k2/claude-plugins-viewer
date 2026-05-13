@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getAgentDetail } from '@/lib/resources';
 import { DetailHeader } from '../../DetailHeader';
+import { ResourceToggle } from '../../ResourceToggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,13 @@ export default async function AgentDetailPage({
         badge="agent"
         description={record.description}
       />
+
+      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
+        <span className={`text-sm ${record.enabled ? 'text-white' : 'text-muted'}`}>
+          {record.enabled ? 'Enabled' : 'Disabled (.md.disabled)'}
+        </span>
+        <ResourceToggle kind="agent" id={record.id} enabled={record.enabled} size="md" />
+      </section>
 
       <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         {record.model && <Stat label="Model" value={record.model} />}
