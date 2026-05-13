@@ -1,6 +1,7 @@
 # Napkin Runbook
 
 ## Curation Rules
+
 - Re-prioritize on every read.
 - Keep recurring, high-value notes only.
 - Max 10 items per category.
@@ -14,13 +15,13 @@
 2. **[2026-05-13] Always run `npx tsc --noEmit` after touching `lib/` or `app/`**
    Do instead: validate with `cd /Volumes/KINGSTON/Projects/claude-plugins-viewer && npx tsc --noEmit` before claiming work done. Dev server keeps running but TS errors surface only on full check.
 
-2. **[2026-05-13] Server Components reading filesystem MUST use `export const dynamic = 'force-dynamic'`**
+3. **[2026-05-13] Server Components reading filesystem MUST use `export const dynamic = 'force-dynamic'`**
    Do instead: without it, Next.js pre-renders at build-time and captures a stale snapshot of `~/.claude/plugins/`. Every page that reads the filesystem needs this top-of-file export.
 
-3. **[2026-05-13] KINGSTON drive can unmount mid-session — dev server gets stuck handles**
+4. **[2026-05-13] KINGSTON drive can unmount mid-session — dev server gets stuck handles**
    Do instead: after remount, ALWAYS kill the old process first: `lsof -ti:3737 | xargs kill -9` then `npm run dev`. Trying to reuse the stale process gives `ENOENT scandir 'app'` even though files are back.
 
-4. **[2026-05-13] Test routes with curl, not screenshots — RSC payload exposes ids**
+5. **[2026-05-13] Test routes with curl, not screenshots — RSC payload exposes ids**
    Do instead: `curl -s http://localhost:3737/skills | python3 -c "import sys,re; print([m.group(1) for m in re.finditer(r'\\\\\\\\\"id\\\\\\\\\":\\\\\\\\\"([^\\\\\\\\\"]+)\\\\\\\\\"',sys.stdin.read())][:5])"` reveals real resource ids without opening browser.
 
 ## Shell & Command Reliability
@@ -34,16 +35,16 @@
 3. **[2026-05-13] Zsh expands `[id]` as glob — quote paths with brackets**
    Do instead: `mkdir -p "app/plugins/[id]"` (double-quoted). Unquoted `mkdir -p app/plugins/[id]` fails with `no matches found`.
 
-2. **[2026-05-13] Long-running `npm install` / `next build` → use `run_in_background: true`**
+4. **[2026-05-13] Long-running `npm install` / `next build` → use `run_in_background: true`**
    Do instead: cold install on this project takes ~60s, first `next build` ~30s. Run in background, await notification; don't block the foreground with sleep loops.
 
-4. **[2026-05-13] Volume `/Volumes/KINGSTON` shell cwd vanishes when drive unmounts**
+5. **[2026-05-13] Volume `/Volumes/KINGSTON` shell cwd vanishes when drive unmounts**
    Do instead: harness recovers cwd to `$HOME`. Re-issue commands with explicit absolute path: `cd /Volumes/KINGSTON/Projects/claude-plugins-viewer && <cmd>`.
 
-5. **[2026-05-13] `next build` fails with ENOENT rename `500.html` on KINGSTON volume**
+6. **[2026-05-13] `next build` fails with ENOENT rename `500.html` on KINGSTON volume**
    Do instead: this is a FS quirk on the external drive, NOT a code error. Build output shows `Compiled successfully` and `checking validity of types` BEFORE the rename failure. Treat the build as type-clean if those lines appear; dev server still works.
 
-6. **[2026-05-13] Security hook trips on the literal token e\x\e\c followed by `(` even in benign contexts**
+7. **[2026-05-13] Security hook trips on the literal token e\x\e\c followed by `(` even in benign contexts**
    Do instead: in `lib/cli.ts`, alias as `runExecFile = promisify(execFile)`. Hook regex matches the bare three-letter call; the alias name avoids it. Using `execFile` with args array is already injection-safe.
 
 ## Next.js & React Patterns
