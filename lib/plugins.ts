@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { getEnabledMap } from './settings';
 
 export type InstalledEntry = {
   scope: string;
@@ -54,6 +55,7 @@ export type PluginRecord = {
   };
   hasManifest: boolean;
   hasReadme: boolean;
+  enabled: boolean;
 };
 
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
@@ -128,6 +130,7 @@ export async function getPlugins(): Promise<PluginRecord[]> {
   const installed = await readJson<{ plugins: Record<string, InstalledEntry[]> }>(INSTALLED_JSON);
   if (!installed?.plugins) return [];
 
+  const enabledMap = await getEnabledMap();
   const records: PluginRecord[] = [];
 
   for (const [id, entries] of Object.entries(installed.plugins)) {
@@ -189,6 +192,7 @@ export async function getPlugins(): Promise<PluginRecord[]> {
       },
       hasManifest: Object.keys(manifest).length > 0,
       hasReadme,
+      enabled: enabledMap[id] !== false,
     });
   }
 
