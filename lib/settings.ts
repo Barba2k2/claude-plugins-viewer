@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { cache } from 'react';
 
 const SETTINGS_PATH = path.join(os.homedir(), '.claude', 'settings.json');
 
@@ -10,19 +11,19 @@ export type ClaudeSettings = {
   [key: string]: unknown;
 };
 
-export async function readSettings(): Promise<ClaudeSettings> {
+export const readSettings = cache(async (): Promise<ClaudeSettings> => {
   const raw = await fs.readFile(SETTINGS_PATH, 'utf8');
   return JSON.parse(raw) as ClaudeSettings;
-}
+});
 
-export async function getEnabledMap(): Promise<Record<string, boolean>> {
+export const getEnabledMap = cache(async (): Promise<Record<string, boolean>> => {
   try {
     const settings = await readSettings();
     return settings.enabledPlugins ?? {};
   } catch {
     return {};
   }
-}
+});
 
 async function backupOnce(): Promise<void> {
   const backup = `${SETTINGS_PATH}.bak`;
@@ -48,16 +49,14 @@ async function writeSettings(next: ClaudeSettings): Promise<void> {
   await fs.rename(tmp, SETTINGS_PATH);
 }
 
-export async function getDisabledMcps(): Promise<string[]> {
+export const getDisabledMcps = cache(async (): Promise<string[]> => {
   try {
     const settings = await readSettings();
-    return Array.isArray(settings.disabledMcpjsonServers)
-      ? settings.disabledMcpjsonServers
-      : [];
+    return Array.isArray(settings.disabledMcpjsonServers) ? settings.disabledMcpjsonServers : [];
   } catch {
     return [];
   }
-}
+});
 
 export async function setMcpEnabled(name: string, enabled: boolean): Promise<void> {
   if (!MCP_NAME_RE.test(name)) {

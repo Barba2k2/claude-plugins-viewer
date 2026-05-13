@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { cache } from 'react';
 import { getEnabledMap } from './settings';
 
 export type InstalledEntry = {
@@ -126,84 +127,86 @@ async function countHooks(installPath: string): Promise<{ count: number; names: 
   return { count: entries.length, names: entries };
 }
 
-export async function getPlugins(): Promise<PluginRecord[]> {
+export const getPlugins = cache(_getPlugins);
+
+async function _getPlugins(): Promise<PluginRecord[]> {
   const installed = await readJson<{ plugins: Record<string, InstalledEntry[]> }>(INSTALLED_JSON);
   if (!installed?.plugins) return [];
 
   const enabledMap = await getEnabledMap();
-  const records: PluginRecord[] = [];
 
-  for (const [id, entries] of Object.entries(installed.plugins)) {
-    const entry = entries[0];
-    if (!entry) continue;
-    const [name, marketplace] = id.split('@');
-    const installPath = entry.installPath;
-    const manifest = (await readJson<PluginManifest>(
-      path.join(installPath, '.claude-plugin', 'plugin.json'),
-    )) ?? {};
+  const records = (
+    await Promise.all(
+      Object.entries(installed.plugins).map(async ([id, entries]) => {
+        const entry = entries[0];
+        if (!entry) return null;
+        const [name, marketplace] = id.split('@');
+        const installPath = entry.installPath;
+        const manifest =
+          (await readJson<PluginManifest>(
+            path.join(installPath, '.claude-plugin', 'plugin.json'),
+          )) ?? {};
 
-    const [skills, agents, commands, hooks, mcps, hasReadme] = await Promise.all([
-      listDir(path.join(installPath, 'skills')),
-      listDir(path.join(installPath, 'agents')),
-      listDir(path.join(installPath, 'commands')),
-      countHooks(installPath),
-      countMcpServers(installPath),
-      exists(path.join(installPath, 'README.md')),
-    ]);
+        const [skills, agents, commands, hooks, mcps, hasReadme] = await Promise.all([
+          listDir(path.join(installPath, 'skills')),
+          listDir(path.join(installPath, 'agents')),
+          listDir(path.join(installPath, 'commands')),
+          countHooks(installPath),
+          countMcpServers(installPath),
+          exists(path.join(installPath, 'README.md')),
+        ]);
 
-    const repository =
-      typeof manifest.repository === 'string'
-        ? manifest.repository
-        : manifest.repository?.url;
-    const author =
-      typeof manifest.author === 'string'
-        ? manifest.author
-        : manifest.author?.name;
+        const repository =
+          typeof manifest.repository === 'string' ? manifest.repository : manifest.repository?.url;
+        const author =
+          typeof manifest.author === 'string' ? manifest.author : manifest.author?.name;
 
-    records.push({
-      id,
-      name: manifest.name || name,
-      marketplace: marketplace || 'unknown',
-      description: manifest.description || '',
-      version: manifest.version || entry.version,
-      scope: entry.scope,
-      installPath,
-      installedAt: entry.installedAt,
-      lastUpdated: entry.lastUpdated,
-      gitCommitSha: entry.gitCommitSha,
-      homepage: manifest.homepage,
-      repository,
-      license: manifest.license,
-      author,
-      keywords: manifest.keywords ?? [],
-      counts: {
-        skills: skills.length,
-        agents: agents.length,
-        commands: commands.length,
-        hooks: hooks.count,
-        mcps: mcps.count,
-      },
-      resources: {
-        skills,
-        agents,
-        commands,
-        hooks: hooks.names,
-        mcps: mcps.names,
-      },
-      hasManifest: Object.keys(manifest).length > 0,
-      hasReadme,
-      enabled: enabledMap[id] !== false,
-    });
-  }
+        return {
+          id,
+          name: manifest.name || name,
+          marketplace: marketplace || 'unknown',
+          description: manifest.description || '',
+          version: manifest.version || entry.version,
+          scope: entry.scope,
+          installPath,
+          installedAt: entry.installedAt,
+          lastUpdated: entry.lastUpdated,
+          gitCommitSha: entry.gitCommitSha,
+          homepage: manifest.homepage,
+          repository,
+          license: manifest.license,
+          author,
+          keywords: manifest.keywords ?? [],
+          counts: {
+            skills: skills.length,
+            agents: agents.length,
+            commands: commands.length,
+            hooks: hooks.count,
+            mcps: mcps.count,
+          },
+          resources: {
+            skills,
+            agents,
+            commands,
+            hooks: hooks.names,
+            mcps: mcps.names,
+          },
+          hasManifest: Object.keys(manifest).length > 0,
+          hasReadme,
+          enabled: enabledMap[id] !== false,
+        } as PluginRecord;
+      }),
+    )
+  ).filter((r): r is PluginRecord => r !== null);
 
   records.sort((a, b) => a.name.localeCompare(b.name));
   return records;
 }
 
-export async function getPluginById(id: string): Promise<PluginRecord | null> {
+export const getPluginById = cache(async (id: string): Promise<PluginRecord | null> => {
   const all = await getPlugins();
   return all.find((p) => p.id === id) ?? null;
-}
+});
 
 export async function readPluginReadme(installPath: string): Promise<string | null> {
   try {

@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { cache } from 'react';
 
 const CLAUDE_DIR = path.join(os.homedir(), '.claude');
 const GLOBAL_CLAUDE_MD = path.join(CLAUDE_DIR, 'CLAUDE.md');
@@ -73,7 +74,9 @@ async function listMdRecursive(dir: string, base: string): Promise<string[]> {
   return out;
 }
 
-export async function getGlobalMemories(): Promise<MemoryFile[]> {
+export const getGlobalMemories = cache(_getGlobalMemories);
+
+async function _getGlobalMemories(): Promise<MemoryFile[]> {
   const out: MemoryFile[] = [];
 
   const rootStat = await statSafe(GLOBAL_CLAUDE_MD);
@@ -111,7 +114,9 @@ function decodeProjectPath(id: string): string {
   return id.replace(/-/g, '/');
 }
 
-export async function getProjects(): Promise<MemoryProject[]> {
+export const getProjects = cache(_getProjects);
+
+async function _getProjects(): Promise<MemoryProject[]> {
   let entries: { name: string; isDirectory(): boolean }[];
   try {
     entries = await fs.readdir(PROJECTS_DIR, { withFileTypes: true });
@@ -119,32 +124,37 @@ export async function getProjects(): Promise<MemoryProject[]> {
     return [];
   }
 
-  const out: MemoryProject[] = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    if (entry.name.startsWith('.')) continue;
-    const id = entry.name;
-    const projectDir = path.join(PROJECTS_DIR, id);
-    const memoryDir = path.join(projectDir, 'memory');
-    const instructionFile = path.join(projectDir, 'CLAUDE.md');
+  const candidates = entries
+    .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
+    .map((e) => e.name);
 
-    const memoryFiles = await listMdRecursive(memoryDir, memoryDir);
-    const instructionStat = await statSafe(instructionFile);
+  const results = await Promise.all(
+    candidates.map(async (id) => {
+      const projectDir = path.join(PROJECTS_DIR, id);
+      const memoryDir = path.join(projectDir, 'memory');
+      const instructionFile = path.join(projectDir, 'CLAUDE.md');
+      const [memoryFiles, instructionStat] = await Promise.all([
+        listMdRecursive(memoryDir, memoryDir),
+        statSafe(instructionFile),
+      ]);
+      if (memoryFiles.length === 0 && !instructionStat) return null;
+      return {
+        id,
+        displayPath: decodeProjectPath(id),
+        hasInstruction: !!instructionStat,
+        memoryFileCount: memoryFiles.length,
+      };
+    }),
+  );
 
-    if (memoryFiles.length === 0 && !instructionStat) continue;
-
-    out.push({
-      id,
-      displayPath: decodeProjectPath(id),
-      hasInstruction: !!instructionStat,
-      memoryFileCount: memoryFiles.length,
-    });
-  }
-
-  return out.sort((a, b) => a.displayPath.localeCompare(b.displayPath));
+  return results
+    .filter((r): r is MemoryProject => r !== null)
+    .sort((a, b) => a.displayPath.localeCompare(b.displayPath));
 }
 
-export async function getProjectMemories(projectId: string): Promise<MemoryFile[]> {
+export const getProjectMemories = cache(_getProjectMemories);
+
+async function _getProjectMemories(projectId: string): Promise<MemoryFile[]> {
   if (!SAFE_PROJECT_ID.test(projectId)) throw new Error(`invalid project id: ${projectId}`);
   const projectDir = path.join(PROJECTS_DIR, projectId);
   const memoryDir = path.join(projectDir, 'memory');
