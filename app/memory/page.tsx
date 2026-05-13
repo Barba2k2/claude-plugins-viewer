@@ -1,8 +1,8 @@
-import Link from 'next/link';
 import { getGlobalMemories, getProjects } from '@/lib/memory';
 import { MemoryFileRow } from './MemoryFileRow';
 import { NewMemoryForm } from './NewMemoryForm';
 import { CollapsibleSection } from './CollapsibleSection';
+import { ProjectMemoryRow } from './ProjectMemoryRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,24 +70,7 @@ export default async function MemoryPage() {
         ) : (
           <ul className="flex flex-col gap-2">
             {projects.map((p) => (
-              <li key={p.id}>
-                <Link
-                  href={`/memory/projects/${encodeURIComponent(p.id)}`}
-                  className="group flex flex-wrap items-center gap-2 rounded-xl border border-border bg-panel p-3 transition hover:border-accent"
-                >
-                  <span className="flex-1 truncate font-mono text-xs text-white group-hover:text-accent">
-                    {p.displayPath}
-                  </span>
-                  {p.hasInstruction && (
-                    <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[10px] text-accent">
-                      CLAUDE.md
-                    </span>
-                  )}
-                  <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
-                    {p.memoryFileCount} memories
-                  </span>
-                </Link>
-              </li>
+              <ProjectMemoryRow key={p.id} project={p} />
             ))}
           </ul>
         )}

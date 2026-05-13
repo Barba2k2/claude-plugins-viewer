@@ -6,11 +6,7 @@ import { NewMemoryForm } from '../../NewMemoryForm';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProjectMemoryPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function ProjectMemoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: rawId } = await params;
   const id = decodeURIComponent(rawId);
 

@@ -6,7 +6,9 @@ import {
   writeMemoryFile,
   deleteMemoryFile,
   createMemoryFile,
+  getProjectMemories,
   type CreateScope,
+  type MemoryFile,
 } from '@/lib/memory';
 
 export type ActionResult<T = void> =
@@ -27,10 +29,7 @@ export async function readMemoryAction(absPath: string): Promise<ActionResult<st
   }
 }
 
-export async function saveMemoryAction(
-  absPath: string,
-  content: string,
-): Promise<ActionResult> {
+export async function saveMemoryAction(absPath: string, content: string): Promise<ActionResult> {
   try {
     await writeMemoryFile(absPath, content);
     revalidate();
@@ -45,6 +44,17 @@ export async function deleteMemoryAction(absPath: string): Promise<ActionResult>
     await deleteMemoryFile(absPath);
     revalidate();
     return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
+  }
+}
+
+export async function loadProjectMemoriesAction(
+  projectId: string,
+): Promise<ActionResult<MemoryFile[]>> {
+  try {
+    const files = await getProjectMemories(projectId);
+    return { success: true, data: files };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
   }

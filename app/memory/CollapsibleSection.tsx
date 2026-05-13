@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemoryStore } from '@/lib/memoryStore';
+import { Chevron } from './Chevron';
 
 type Props = {
   sectionKey: string;
@@ -41,24 +42,5 @@ export function CollapsibleSection({
       </div>
       {open && children}
     </div>
-  );
-}
-
-function Chevron({ open }: { open: boolean }) {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={`text-muted transition-transform duration-200 ${open ? 'rotate-90' : 'rotate-0'}`}
-      aria-hidden="true"
-    >
-      <polyline points="9 6 15 12 9 18" />
-    </svg>
   );
 }

@@ -63,7 +63,7 @@ export function NewMemoryForm({ scopeKey, scope, label }: Props) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="filename.md"
-        className="flex-1 min-w-[200px] rounded-md border border-border bg-panel px-2 py-1 font-mono text-xs outline-none focus:border-accent"
+        className="min-w-[200px] flex-1 rounded-md border border-border bg-panel px-2 py-1 font-mono text-xs outline-none focus:border-accent"
         disabled={pending}
       />
       <button
@@ -85,7 +85,7 @@ export function NewMemoryForm({ scopeKey, scope, label }: Props) {
         Cancel
       </button>
       {error && (
-        <pre className="w-full max-h-24 overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
+        <pre className="max-h-24 w-full overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
           {error}
         </pre>
       )}

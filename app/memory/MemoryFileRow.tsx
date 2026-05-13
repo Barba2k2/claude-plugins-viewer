@@ -2,13 +2,10 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  readMemoryAction,
-  saveMemoryAction,
-  deleteMemoryAction,
-} from '../actions/memory';
+import { readMemoryAction, saveMemoryAction, deleteMemoryAction } from '../actions/memory';
 import { useMemoryStore } from '@/lib/memoryStore';
 import type { MemoryFile } from '@/lib/memory';
+import { Chevron } from './Chevron';
 
 type Props = { file: MemoryFile; canDelete?: boolean };
 
@@ -32,7 +29,7 @@ export function MemoryFileRow({ file, canDelete = true }: Props) {
   const [, startTransition] = useTransition();
   const router = useRouter();
 
-  const loadAndOpen = () => {
+  const toggle = () => {
     if (isOpen) {
       setExpanded(key, false);
       return;
@@ -83,32 +80,27 @@ export function MemoryFileRow({ file, canDelete = true }: Props) {
     });
   };
 
-  const sizeLabel = formatBytes(file.size);
-  const mtimeLabel = new Date(file.mtime).toLocaleString();
-
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={loadAndOpen}
-          className="flex-1 truncate text-left font-mono text-sm text-white transition hover:text-accent"
+          onClick={toggle}
+          aria-expanded={isOpen}
+          className="group flex flex-1 items-center gap-2 text-left"
         >
-          {file.relativePath}
+          <Chevron open={isOpen} size={16} />
+          <span className="truncate font-mono text-sm text-white group-hover:text-accent">
+            {file.relativePath}
+          </span>
         </button>
         <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
           {file.scope}
         </span>
-        <span className="font-mono text-[10px] text-muted">{sizeLabel}</span>
-        <span className="font-mono text-[10px] text-muted">{mtimeLabel}</span>
-        <button
-          type="button"
-          onClick={loadAndOpen}
-          disabled={isPending}
-          className="rounded-md border border-border bg-bg px-2 py-1 text-[11px] text-muted transition hover:text-white disabled:opacity-50"
-        >
-          {isOpen ? 'Close' : 'Edit'}
-        </button>
+        <span className="font-mono text-[10px] text-muted">{formatBytes(file.size)}</span>
+        <span className="font-mono text-[10px] text-muted">
+          {new Date(file.mtime).toLocaleString()}
+        </span>
         {canDelete && (
           <button
             type="button"
