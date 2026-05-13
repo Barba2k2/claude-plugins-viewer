@@ -52,47 +52,48 @@ export function McpsClient({ mcps }: { mcps: McpRecord[] }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {filtered.map((m) => (
-            <li
-              key={m.id}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-mono text-sm text-white">{m.name}</h3>
-                <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[11px] text-accent">
-                  {m.transport}
-                </span>
-                <Link
-                  href={`/plugins/${encodeURIComponent(m.pluginId)}`}
-                  className="ml-auto rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:text-accent"
-                >
-                  {m.pluginName}
-                </Link>
-              </div>
-              {m.url && (
-                <div className="text-xs">
-                  <span className="text-muted">url: </span>
-                  <span className="font-mono text-white">{m.url}</span>
+            <li key={m.id}>
+              <Link
+                href={`/mcps/${encodeURIComponent(m.id)}`}
+                className="group flex flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent"
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-mono text-sm text-white group-hover:text-accent">
+                    {m.name}
+                  </h3>
+                  <span className="rounded-full bg-accent/10 px-2 py-0.5 font-mono text-[11px] text-accent">
+                    {m.transport}
+                  </span>
+                  <span className="ml-auto rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+                    {m.pluginName}
+                  </span>
                 </div>
-              )}
-              {m.command && (
-                <code className="break-all rounded-lg bg-bg p-3 font-mono text-xs text-white">
-                  {m.command}
-                  {m.args && m.args.length > 0 && ' ' + m.args.join(' ')}
-                </code>
-              )}
-              {m.envKeys.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 text-[10px]">
-                  <span className="text-muted">env:</span>
-                  {m.envKeys.map((k) => (
-                    <span
-                      key={k}
-                      className="rounded-full bg-bg px-2 py-0.5 font-mono text-muted"
-                    >
-                      {k}
-                    </span>
-                  ))}
-                </div>
-              )}
+                {m.url && (
+                  <div className="text-xs">
+                    <span className="text-muted">url: </span>
+                    <span className="font-mono text-white">{m.url}</span>
+                  </div>
+                )}
+                {m.command && (
+                  <code className="break-all rounded-lg bg-bg p-3 font-mono text-xs text-white">
+                    {m.command}
+                    {m.args && m.args.length > 0 && ' ' + m.args.join(' ')}
+                  </code>
+                )}
+                {m.envKeys.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 text-[10px]">
+                    <span className="text-muted">env:</span>
+                    {m.envKeys.map((k) => (
+                      <span
+                        key={k}
+                        className="rounded-full bg-bg px-2 py-0.5 font-mono text-muted"
+                      >
+                        {k}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Link>
             </li>
           ))}
         </ul>
