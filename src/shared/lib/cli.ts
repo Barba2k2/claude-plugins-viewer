@@ -1,4 +1,4 @@
-import { runCliTool, type CliResult } from './platform';
+import { runCliTool, type CliResult } from '@/entities/ai-source';
 
 export type { CliResult };
 

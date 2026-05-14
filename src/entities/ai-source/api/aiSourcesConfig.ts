@@ -65,7 +65,6 @@ export async function getSourcesConfig(): Promise<SourcesConfig> {
     const raw = await fs.readFile(CONFIG_FILE, 'utf8');
     const parsed = JSON.parse(raw);
     if (!isValidConfig(parsed)) return EMPTY;
-    const parsedObj = parsed as Record<string, unknown>;
     return {
       customSources: (parsed.customSources ?? []).filter(
         (s): s is CustomSource =>
@@ -81,8 +80,8 @@ export async function getSourcesConfig(): Promise<SourcesConfig> {
       nameOverrides: Object.fromEntries(
         Object.entries(parsed.nameOverrides ?? {}).filter(([, v]) => typeof v === 'string'),
       ) as Record<string, string>,
-      cliOverrides: readCliOverrides(parsedObj.cliOverrides),
-      preferWsl: parsedObj.preferWsl === true,
+      cliOverrides: readCliOverrides((parsed as Record<string, unknown>).cliOverrides),
+      preferWsl: (parsed as Record<string, unknown>).preferWsl === true,
     };
   } catch {
     return EMPTY;
