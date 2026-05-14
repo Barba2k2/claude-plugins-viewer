@@ -23,6 +23,13 @@ type AiSourcesState = {
   defaultNameDraft: Record<string, string>;
   defaultError: Record<string, string | null>;
 
+  cliEditing: Record<string, boolean>;
+  cliPathDraft: Record<string, string>;
+  cliUseWslDraft: Record<string, boolean>;
+  cliError: Record<string, string | null>;
+  cliPending: Record<string, boolean>;
+  cliRescanPending: boolean;
+
   setDraft: (path: string, content: string) => void;
   clearDraft: (path: string) => void;
   setPending: (path: string, value: boolean) => void;
@@ -47,6 +54,13 @@ type AiSourcesState = {
   setDefaultEditing: (id: string, value: boolean) => void;
   setDefaultNameDraft: (id: string, value: string) => void;
   setDefaultError: (id: string, value: string | null) => void;
+
+  setCliEditing: (id: string, value: boolean) => void;
+  setCliPathDraft: (id: string, value: string) => void;
+  setCliUseWslDraft: (id: string, value: boolean) => void;
+  setCliError: (id: string, value: string | null) => void;
+  setCliPending: (id: string, value: boolean) => void;
+  setCliRescanPending: (value: boolean) => void;
 };
 
 export const useAiSourcesStore = create<AiSourcesState>((set) => ({
@@ -71,6 +85,13 @@ export const useAiSourcesStore = create<AiSourcesState>((set) => ({
   defaultEditing: {},
   defaultNameDraft: {},
   defaultError: {},
+
+  cliEditing: {},
+  cliPathDraft: {},
+  cliUseWslDraft: {},
+  cliError: {},
+  cliPending: {},
+  cliRescanPending: false,
 
   setDraft: (path, content) => set((s) => ({ drafts: { ...s.drafts, [path]: content } })),
   clearDraft: (path) =>
@@ -111,8 +132,7 @@ export const useAiSourcesStore = create<AiSourcesState>((set) => ({
     set((s) => ({ customNameDraft: { ...s.customNameDraft, [id]: value } })),
   setCustomConfirmRemove: (id, value) =>
     set((s) => ({ customConfirmRemove: { ...s.customConfirmRemove, [id]: value } })),
-  setCustomError: (id, value) =>
-    set((s) => ({ customError: { ...s.customError, [id]: value } })),
+  setCustomError: (id, value) => set((s) => ({ customError: { ...s.customError, [id]: value } })),
 
   setDefaultEditing: (id, value) =>
     set((s) => ({ defaultEditing: { ...s.defaultEditing, [id]: value } })),
@@ -120,4 +140,13 @@ export const useAiSourcesStore = create<AiSourcesState>((set) => ({
     set((s) => ({ defaultNameDraft: { ...s.defaultNameDraft, [id]: value } })),
   setDefaultError: (id, value) =>
     set((s) => ({ defaultError: { ...s.defaultError, [id]: value } })),
+
+  setCliEditing: (id, value) => set((s) => ({ cliEditing: { ...s.cliEditing, [id]: value } })),
+  setCliPathDraft: (id, value) =>
+    set((s) => ({ cliPathDraft: { ...s.cliPathDraft, [id]: value } })),
+  setCliUseWslDraft: (id, value) =>
+    set((s) => ({ cliUseWslDraft: { ...s.cliUseWslDraft, [id]: value } })),
+  setCliError: (id, value) => set((s) => ({ cliError: { ...s.cliError, [id]: value } })),
+  setCliPending: (id, value) => set((s) => ({ cliPending: { ...s.cliPending, [id]: value } })),
+  setCliRescanPending: (value) => set({ cliRescanPending: value }),
 }));

@@ -21,7 +21,9 @@ export const KNOWN_TOOLS: KnownTool[] = [
   { id: 'aider', dir: '.aider', defaultName: 'AIDER' },
 ];
 
-const CLAUDE_TOOL: KnownTool = { id: 'claude', dir: '.claude', defaultName: 'CLAUDE' };
+export const CLAUDE_TOOL: KnownTool = { id: 'claude', dir: '.claude', defaultName: 'CLAUDE' };
+
+export const ALL_TOOLS: KnownTool[] = [CLAUDE_TOOL, ...KNOWN_TOOLS];
 
 export const CLAUDE_SOURCE_ID = 'claude';
 
