@@ -1,10 +1,9 @@
 import { getPlugins } from '@/entities/plugin';
 import { getActiveSource } from '@/entities/active-source';
-import { CLAUDE_SOURCE_ID } from '@/entities/ai-source';
+import { CLAUDE_SOURCE_ID, getCliStatus } from '@/entities/ai-source';
 import { PluginGrid } from '@/widgets/plugin-grid/ui/PluginGrid';
 import { InstallPlugin } from '@/features/install-plugin/ui/InstallPlugin';
 import { NonClaudeStub } from '@/widgets/non-claude-stub/ui/NonClaudeStub';
-import { getCliStatus } from '@/shared/lib/platform';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,8 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { readAiFile, writeAiFile, deleteAiFile, createAiFile } from '@/entities/ai-source';
 import {
+  readAiFile,
+  writeAiFile,
+  deleteAiFile,
+  createAiFile,
   addCustomSource,
   removeCustomSource,
   renameCustomSource,
@@ -10,13 +13,11 @@ import {
   setDefaultName,
   setCliOverride,
   setPreferWsl,
-} from '@/entities/ai-source';
-import {
   rescanCli,
   validateCliPath,
   getAllCliStatuses,
   type CliStatus,
-} from '@/shared/lib/platform';
+} from '@/entities/ai-source';
 
 export type ActionResult<T = void> =
   | (T extends void ? { success: true } : { success: true; data: T })

@@ -1,7 +1,13 @@
 import path from 'node:path';
 import os from 'node:os';
 import { promises as fs } from 'node:fs';
-import { ALL_TOOLS, KNOWN_TOOLS, getSourcesConfig } from '@/entities/ai-source';
+import {
+  ALL_TOOLS,
+  KNOWN_TOOLS,
+  getSourcesConfig,
+  getCliStatus,
+  getToolCliSpec,
+} from '@/entities/ai-source';
 import { AutoDiscoveredSection } from '@/features/manage-ai-sources/ui/AutoDiscoveredSection';
 import { CustomSourcesSection } from '@/features/manage-ai-sources/ui/CustomSourcesSection';
 import { AddSourceForm } from '@/features/manage-ai-sources/ui/AddSourceForm';
@@ -9,7 +15,7 @@ import {
   CliDetectionSection,
   type CliDetectionRowData,
 } from '@/features/manage-ai-sources/ui/CliDetectionSection';
-import { getCliStatus, getToolCliSpec, getPlatformInfo } from '@/shared/lib/platform';
+import { getPlatformInfo } from '@/shared/lib/platform';
 
 export const dynamic = 'force-dynamic';
 

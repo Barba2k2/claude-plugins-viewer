@@ -2,12 +2,9 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  rescanCliAction,
-  setPreferWslAction,
-} from '@/features/manage-ai-sources/api/aiSources';
+import { rescanCliAction, setPreferWslAction } from '@/features/manage-ai-sources/api/aiSources';
 import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
-import type { CliStatus } from '@/shared/lib/platform';
+import type { CliStatus } from '@/entities/ai-source';
 import { Button } from '@/design_system/inputs';
 import { CliDetectionRow } from './CliDetectionRow';
 

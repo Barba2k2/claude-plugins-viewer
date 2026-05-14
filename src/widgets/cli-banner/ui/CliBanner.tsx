@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getCliStatus } from '@/shared/lib/platform';
+import { getCliStatus } from '@/entities/ai-source';
 
 const PRIMARY_TOOL_ID = 'claude';
 const PRIMARY_TOOL_NAME = 'Claude';

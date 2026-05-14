@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPluginById, readPluginReadme } from '@/entities/plugin';
+import { getCliStatus } from '@/entities/ai-source';
 import { UninstallPlugin } from '@/features/uninstall-plugin/ui/UninstallPlugin';
 import { UpdatePlugin } from '@/features/update-plugin/ui/UpdatePlugin';
 import { PluginHeader } from '@/widgets/plugin-detail/ui/PluginHeader';
@@ -8,7 +9,6 @@ import { PluginCountsGrid } from '@/widgets/plugin-detail/ui/PluginCountsGrid';
 import { PluginResourcesGrid } from '@/widgets/plugin-detail/ui/PluginResourcesGrid';
 import { InstallInfoSection } from '@/widgets/plugin-detail/ui/InstallInfoSection';
 import { ReadmeSection } from '@/widgets/plugin-detail/ui/ReadmeSection';
-import { getCliStatus } from '@/shared/lib/platform';
 
 export const dynamic = 'force-dynamic';
 
