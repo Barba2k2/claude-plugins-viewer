@@ -1,15 +1,8 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  setCliOverrideAction,
-  clearCliOverrideAction,
-} from '@/features/manage-ai-sources/api/aiSources';
-import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
-import type { CliStatus } from '@/shared/lib/platform';
-import { Button } from '@/design_system/inputs';
-import { Input } from '@/design_system/inputs';
+import type { CliStatus } from '@/entities/ai-source';
+import { useCliDetectionRow } from '@/features/manage-ai-sources/model/useCliDetectionRow';
+import { Button, Input } from '@/design_system/inputs';
 import { Badge } from '@/design_system/feedback';
 
 type Props = {
@@ -20,6 +13,13 @@ type Props = {
   showWslOption: boolean;
 };
 
+const SOURCE_LABEL: Record<CliStatus['source'], string> = {
+  override: 'override',
+  native: 'native',
+  wsl: 'wsl',
+  missing: 'not found',
+};
+
 export function CliDetectionRow({
   toolId,
   displayName,
@@ -27,73 +27,7 @@ export function CliDetectionRow({
   hasOverride,
   showWslOption,
 }: Props) {
-  const editing = useAiSourcesStore((s) => s.cliEditing[toolId] ?? false);
-  const pathDraft = useAiSourcesStore((s) => s.cliPathDraft[toolId] ?? '');
-  const useWslDraft = useAiSourcesStore((s) => s.cliUseWslDraft[toolId] ?? false);
-  const error = useAiSourcesStore((s) => s.cliError[toolId] ?? null);
-  const pending = useAiSourcesStore((s) => s.cliPending[toolId] ?? false);
-  const setEditing = useAiSourcesStore((s) => s.setCliEditing);
-  const setPathDraft = useAiSourcesStore((s) => s.setCliPathDraft);
-  const setUseWslDraft = useAiSourcesStore((s) => s.setCliUseWslDraft);
-  const setError = useAiSourcesStore((s) => s.setCliError);
-  const setPending = useAiSourcesStore((s) => s.setCliPending);
-
-  const [, startTransition] = useTransition();
-  const router = useRouter();
-
-  const startEdit = () => {
-    setPathDraft(toolId, status.path ?? '');
-    setUseWslDraft(toolId, status.useWsl);
-    setError(toolId, null);
-    setEditing(toolId, true);
-  };
-
-  const cancel = () => {
-    setEditing(toolId, false);
-    setError(toolId, null);
-  };
-
-  const save = () => {
-    const trimmed = pathDraft.trim();
-    if (trimmed.length === 0) {
-      setError(toolId, 'path required');
-      return;
-    }
-    setError(toolId, null);
-    setPending(toolId, true);
-    startTransition(async () => {
-      const result = await setCliOverrideAction(toolId, trimmed, useWslDraft);
-      if (result.success) {
-        setEditing(toolId, false);
-        router.refresh();
-      } else {
-        setError(toolId, result.error);
-      }
-      setPending(toolId, false);
-    });
-  };
-
-  const clear = () => {
-    setError(toolId, null);
-    setPending(toolId, true);
-    startTransition(async () => {
-      const result = await clearCliOverrideAction(toolId);
-      if (result.success) {
-        setEditing(toolId, false);
-        router.refresh();
-      } else {
-        setError(toolId, result.error);
-      }
-      setPending(toolId, false);
-    });
-  };
-
-  const sourceLabel: Record<CliStatus['source'], string> = {
-    override: 'override',
-    native: 'native',
-    wsl: 'wsl',
-    missing: 'not found',
-  };
+  const vm = useCliDetectionRow(toolId, status);
 
   return (
     <li className="bg-card flex flex-col gap-2 rounded-xl border p-4">
@@ -109,7 +43,7 @@ export function CliDetectionRow({
           {toolId}
         </Badge>
         <Badge variant="outline" className="font-mono text-[10px]">
-          {sourceLabel[status.source]}
+          {SOURCE_LABEL[status.source]}
         </Badge>
         {status.version && (
           <Badge variant="outline" className="font-mono text-[10px]">
@@ -117,18 +51,18 @@ export function CliDetectionRow({
           </Badge>
         )}
         <div className="ml-auto flex gap-2">
-          {!editing && (
-            <Button type="button" variant="outline" size="xs" onClick={startEdit}>
+          {!vm.editing && (
+            <Button type="button" variant="outline" size="xs" onClick={vm.startEdit}>
               {hasOverride ? 'Edit path' : 'Configure path'}
             </Button>
           )}
-          {!editing && hasOverride && (
+          {!vm.editing && hasOverride && (
             <Button
               type="button"
               variant="ghost"
               size="xs"
-              onClick={clear}
-              disabled={pending}
+              onClick={vm.clear}
+              disabled={vm.pending}
               title="Remove override and re-detect automatically"
             >
               Reset
@@ -137,55 +71,55 @@ export function CliDetectionRow({
         </div>
       </div>
 
-      {status.path && !editing && (
+      {status.path && !vm.editing && (
         <code className="text-muted-foreground font-mono text-[11px] break-all">
           {status.useWsl ? `wsl ${status.path}` : status.path}
         </code>
       )}
 
-      {!status.found && !editing && (
+      {!status.found && !vm.editing && (
         <p className="text-[11px] text-red-300/80">
-          {displayName} binary not found in PATH. Configure its absolute path to enable
-          plugin actions.
+          {displayName} binary not found in PATH. Configure its absolute path to enable plugin
+          actions.
         </p>
       )}
 
-      {editing && (
+      {vm.editing && (
         <div className="flex flex-col gap-2">
           <Input
             type="text"
-            value={pathDraft}
-            onChange={(e) => setPathDraft(toolId, e.target.value)}
+            value={vm.pathDraft}
+            onChange={(e) => vm.setPathDraft(e.target.value)}
             placeholder={
-              useWslDraft
+              vm.useWslDraft
                 ? 'binary name inside WSL (e.g. claude)'
                 : 'absolute path (e.g. /usr/local/bin/claude)'
             }
             className="font-mono text-xs"
-            disabled={pending}
+            disabled={vm.pending}
             spellCheck={false}
           />
           {showWslOption && (
             <label className="text-muted-foreground flex items-center gap-2 text-[11px]">
               <input
                 type="checkbox"
-                checked={useWslDraft}
-                onChange={(e) => setUseWslDraft(toolId, e.target.checked)}
-                disabled={pending}
+                checked={vm.useWslDraft}
+                onChange={(e) => vm.setUseWslDraft(e.target.checked)}
+                disabled={vm.pending}
               />
               Invoke through WSL
             </label>
           )}
           <div className="flex flex-wrap gap-2">
-            <Button type="button" size="xs" onClick={save} disabled={pending}>
-              {pending ? 'Validating…' : 'Save'}
+            <Button type="button" size="xs" onClick={vm.save} disabled={vm.pending}>
+              {vm.pending ? 'Validating…' : 'Save'}
             </Button>
             <Button
               type="button"
               variant="ghost"
               size="xs"
-              onClick={cancel}
-              disabled={pending}
+              onClick={vm.cancel}
+              disabled={vm.pending}
             >
               Cancel
             </Button>
@@ -193,9 +127,9 @@ export function CliDetectionRow({
         </div>
       )}
 
-      {error && (
+      {vm.error && (
         <pre className="max-h-24 overflow-auto rounded bg-red-900/30 p-2 text-[10px] whitespace-pre-wrap text-red-200">
-          {error}
+          {vm.error}
         </pre>
       )}
     </li>
