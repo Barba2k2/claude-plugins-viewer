@@ -1,0 +1,44 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const TABS: Array<{ href: string; label: string }> = [
+  { href: '/', label: 'Plugins' },
+  { href: '/skills', label: 'Skills' },
+  { href: '/agents', label: 'Agents' },
+  { href: '/commands', label: 'Commands' },
+  { href: '/hooks', label: 'Hooks' },
+  { href: '/mcps', label: 'MCP Servers' },
+  { href: '/marketplaces', label: 'Marketplaces' },
+  { href: '/memory', label: 'Memory' },
+  { href: '/ai-sources', label: 'AI Sources' },
+];
+
+export function Nav() {
+  const pathname = usePathname();
+  return (
+    <nav className="border-border bg-bg/80 sticky top-0 z-10 border-b backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-6 py-3">
+        <Link href="/" className="mr-4 flex items-center gap-2 transition hover:opacity-80">
+          <span className="bg-accent inline-block h-2 w-2 rounded-full" />
+          <span className="text-sm font-medium text-white">Plugins Viewer</span>
+        </Link>
+        {TABS.map((tab) => {
+          const active = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                active ? 'bg-panel text-white' : 'text-muted hover:bg-panel hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
