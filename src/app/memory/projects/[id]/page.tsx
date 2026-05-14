@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProjectMemories, getProjects } from '@/entities/memory';
-import { MemoryFileRow } from '@/features/edit-memory/ui/MemoryFileRow';
-import { NewMemoryForm } from '@/features/edit-memory/ui/NewMemoryForm';
+import { ProjectInstructionSection } from '@/features/edit-memory/ui/ProjectInstructionSection';
+import { ProjectMemoriesSection } from '@/features/edit-memory/ui/ProjectMemoriesSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,61 +22,21 @@ export default async function ProjectMemoryPage({ params }: { params: Promise<{ 
     <main className="mx-auto max-w-5xl px-6 py-10">
       <Link
         href="/memory"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-white"
+        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         ← Back to memory
       </Link>
 
       <header className="mb-6 flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-white">Project memory</h1>
-        <p className="break-all font-mono text-xs text-muted">{project.displayPath}</p>
+        <h1 className="text-xl font-semibold text-foreground">Project memory</h1>
+        <p className="break-all font-mono text-xs text-muted-foreground">{project.displayPath}</p>
       </header>
 
-      <section className="mb-8">
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wide text-muted">Project instruction</h2>
-          {!instruction && (
-            <NewMemoryForm
-              scopeKey={`project-instruction:${id}`}
-              scope={{ kind: 'project-instruction', projectId: id }}
-              label="CLAUDE.md"
-            />
-          )}
-        </div>
-        {instruction ? (
-          <ul>
-            <MemoryFileRow file={instruction} />
-          </ul>
-        ) : (
-          <p className="rounded-xl border border-border bg-panel p-4 text-center text-xs text-muted">
-            No project CLAUDE.md.
-          </p>
-        )}
-      </section>
+      <div className="mb-8">
+        <ProjectInstructionSection projectId={id} instruction={instruction} />
+      </div>
 
-      <section>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wide text-muted">
-            Auto memories ({memories.length})
-          </h2>
-          <NewMemoryForm
-            scopeKey={`project-memory:${id}`}
-            scope={{ kind: 'project-memory', projectId: id }}
-            label="memory"
-          />
-        </div>
-        {memories.length === 0 ? (
-          <p className="rounded-xl border border-border bg-panel p-4 text-center text-xs text-muted">
-            No memory files.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {memories.map((f) => (
-              <MemoryFileRow key={f.path} file={f} />
-            ))}
-          </ul>
-        )}
-      </section>
+      <ProjectMemoriesSection projectId={id} memories={memories} />
     </main>
   );
 }

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createMemoryAction } from '@/features/edit-memory/api/memory';
 import { useMemoryStore } from '@/features/edit-memory/model/memoryStore';
 import type { CreateScope } from '@/entities/memory';
+import { Button } from '@/design_system/inputs';
+import { Input } from '@/design_system/inputs';
 
 type Props = { scopeKey: string; scope: CreateScope; label: string };
 
@@ -43,47 +45,40 @@ export function NewMemoryForm({ scopeKey, scope, label }: Props) {
 
   if (!isActive) {
     return (
-      <button
-        type="button"
-        onClick={() => setActiveScope(scopeKey)}
-        className="rounded-lg border border-border bg-bg px-3 py-1.5 text-xs text-muted transition hover:text-white"
-      >
+      <Button type="button" variant="outline" size="sm" onClick={() => setActiveScope(scopeKey)}>
         + New {label}
-      </button>
+      </Button>
     );
   }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-bg p-3"
+      className="flex flex-wrap items-center gap-2 rounded-lg border bg-card p-3"
     >
-      <input
+      <Input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="filename.md"
-        className="min-w-50 flex-1 rounded-md border border-border bg-panel px-2 py-1 font-mono text-xs outline-none focus:border-accent"
+        className="min-w-50 flex-1 font-mono"
         disabled={pending}
       />
-      <button
-        type="submit"
-        disabled={pending || !name.trim()}
-        className="rounded-md border border-accent bg-accent/20 px-3 py-1 text-xs text-white transition hover:bg-accent/30 disabled:opacity-50"
-      >
+      <Button type="submit" size="sm" disabled={pending || !name.trim()}>
         {pending ? '…' : 'Create'}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => {
           setActiveScope(null);
           setName('');
         }}
         disabled={pending}
-        className="rounded-md border border-border px-3 py-1 text-xs text-muted transition hover:text-white"
       >
         Cancel
-      </button>
+      </Button>
       {error && (
         <pre className="max-h-24 w-full overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
           {error}

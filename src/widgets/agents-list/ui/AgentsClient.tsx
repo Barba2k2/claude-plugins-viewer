@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import Link from 'next/link';
 import { useResourceFilterStore } from '@/features/filter-resources/model/resourceStore';
 import { FilterBar } from '@/widgets/filter-bar/ui/FilterBar';
-import { ResourceToggle } from '@/features/toggle-resource/ui/ResourceToggle';
+import { AgentCard } from './AgentCard';
 import type { AgentRecord } from '@/entities/resource';
 
 export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
@@ -44,48 +43,13 @@ export function AgentsClient({ agents }: { agents: AgentRecord[] }) {
         extraOptions={models}
       />
       {filtered.length === 0 ? (
-        <p className="rounded-xl border border-border bg-panel p-8 text-center text-muted">
+        <p className="rounded-xl border bg-card p-8 text-center text-muted-foreground">
           No agents match these filters.
         </p>
       ) : (
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {filtered.map((a) => (
-            <li key={a.id} className="relative">
-              <div className="absolute right-3 top-3 z-10">
-                <ResourceToggle kind="agent" id={a.id} enabled={a.enabled} />
-              </div>
-              <Link
-                href={`/agents/${encodeURIComponent(a.id)}`}
-                className={`group flex h-full flex-col gap-2 rounded-xl border border-border bg-panel p-4 transition hover:border-accent ${
-                  a.enabled ? '' : 'opacity-60'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3 pr-10">
-                  <h3 className="font-mono text-sm text-white group-hover:text-accent">{a.name}</h3>
-                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
-                    {a.pluginName}
-                  </span>
-                </div>
-                <p className="line-clamp-3 text-xs text-muted">
-                  {a.description || <span className="italic">no description</span>}
-                </p>
-                <div className="flex flex-wrap gap-1.5 text-[10px] text-muted">
-                  {a.model && (
-                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">
-                      model: {a.model}
-                    </span>
-                  )}
-                  {a.color && (
-                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">{a.color}</span>
-                  )}
-                  {a.tools && (
-                    <span className="rounded-full bg-bg px-2 py-0.5 font-mono">
-                      tools: {a.tools.length > 32 ? a.tools.slice(0, 32) + '…' : a.tools}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </li>
+            <AgentCard key={a.id} agent={a} />
           ))}
         </ul>
       )}

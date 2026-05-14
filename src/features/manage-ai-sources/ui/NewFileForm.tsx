@@ -4,6 +4,8 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createAiFileAction } from '@/features/manage-ai-sources/api/aiSources';
 import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
+import { Button } from '@/design_system/inputs';
+import { Input } from '@/design_system/inputs';
 
 type Props = { sourceId: string };
 
@@ -36,40 +38,28 @@ export function NewFileForm({ sourceId }: Props) {
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(sourceId, true)}
-        className="rounded-lg border border-border bg-panel px-3 py-1.5 text-xs text-white transition hover:border-accent"
-      >
+      <Button type="button" variant="outline" size="sm" onClick={() => setOpen(sourceId, true)}>
         + New file
-      </button>
+      </Button>
     );
   }
 
   return (
     <form onSubmit={submit} className="flex flex-wrap items-center gap-2">
-      <input
+      <Input
         type="text"
         value={name}
         onChange={(e) => setName(sourceId, e.target.value)}
         placeholder="path/to/file.md"
-        className="rounded-lg border border-border bg-bg px-2 py-1 text-xs text-white outline-none focus:border-accent"
+        className="h-8 text-xs"
         autoFocus
       />
-      <button
-        type="submit"
-        disabled={isPending || !name.trim()}
-        className="rounded-lg border border-accent bg-accent/20 px-3 py-1 text-xs text-white transition hover:bg-accent/30 disabled:opacity-50"
-      >
+      <Button type="submit" size="sm" disabled={isPending || !name.trim()}>
         {isPending ? 'Creating…' : 'Create'}
-      </button>
-      <button
-        type="button"
-        onClick={() => reset(sourceId)}
-        className="rounded-lg border border-border bg-panel px-3 py-1 text-xs text-muted transition hover:text-white"
-      >
+      </Button>
+      <Button type="button" variant="ghost" size="sm" onClick={() => reset(sourceId)}>
         Cancel
-      </button>
+      </Button>
       {error && <span className="text-[11px] text-red-300">{error}</span>}
     </form>
   );

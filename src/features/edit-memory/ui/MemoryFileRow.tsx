@@ -2,10 +2,16 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { readMemoryAction, saveMemoryAction, deleteMemoryAction } from '@/features/edit-memory/api/memory';
+import {
+  readMemoryAction,
+  saveMemoryAction,
+  deleteMemoryAction,
+} from '@/features/edit-memory/api/memory';
 import { useMemoryStore } from '@/features/edit-memory/model/memoryStore';
 import type { MemoryFile } from '@/entities/memory';
 import { Chevron } from '@/shared/ui/Chevron';
+import { Button } from '@/design_system/inputs';
+import { Badge } from '@/design_system/feedback';
 
 type Props = { file: MemoryFile; canDelete?: boolean };
 
@@ -81,7 +87,7 @@ export function MemoryFileRow({ file, canDelete = true }: Props) {
   };
 
   return (
-    <li className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4">
+    <li className="flex flex-col gap-2 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -90,50 +96,46 @@ export function MemoryFileRow({ file, canDelete = true }: Props) {
           className="group flex flex-1 items-center gap-2 text-left"
         >
           <Chevron open={isOpen} size={16} />
-          <span className="truncate font-mono text-sm text-white group-hover:text-accent">
+          <span className="truncate font-mono text-sm text-foreground group-hover:text-accent">
             {file.relativePath}
           </span>
         </button>
-        <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+        <Badge variant="outline" className="font-mono text-[10px]">
           {file.scope}
-        </span>
-        <span className="font-mono text-[10px] text-muted">{formatBytes(file.size)}</span>
-        <span className="font-mono text-[10px] text-muted">
+        </Badge>
+        <span className="font-mono text-[10px] text-muted-foreground">{formatBytes(file.size)}</span>
+        <span className="font-mono text-[10px] text-muted-foreground">
           {new Date(file.mtime).toLocaleString()}
         </span>
         {canDelete && (
-          <button
+          <Button
             type="button"
+            variant="destructive"
+            size="xs"
             onClick={remove}
             disabled={isPending}
-            className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
           >
             Delete
-          </button>
+          </Button>
         )}
       </div>
       {isOpen && (
         <div className="flex flex-col gap-2">
           {isPending && draft === undefined ? (
-            <p className="text-[11px] text-muted">Loading…</p>
+            <p className="text-[11px] text-muted-foreground">Loading…</p>
           ) : (
             <textarea
               value={draft ?? ''}
               onChange={(e) => setDraft(key, e.target.value)}
               spellCheck={false}
               rows={Math.min(30, Math.max(8, (draft ?? '').split('\n').length + 2))}
-              className="w-full resize-y rounded-lg border border-border bg-bg p-3 font-mono text-xs text-white outline-none focus:border-accent"
+              className="w-full resize-y rounded-lg border bg-background p-3 font-mono text-xs text-foreground outline-none focus:border-accent"
             />
           )}
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={save}
-              disabled={isPending || draft === undefined}
-              className="rounded-lg border border-accent bg-accent/20 px-3 py-1.5 text-xs text-white transition hover:bg-accent/30 disabled:opacity-50"
-            >
+            <Button type="button" size="sm" onClick={save} disabled={isPending || draft === undefined}>
               {isPending ? 'Saving…' : 'Save'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

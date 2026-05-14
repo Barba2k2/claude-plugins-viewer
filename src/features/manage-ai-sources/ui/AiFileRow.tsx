@@ -2,10 +2,16 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { readAiFileAction, saveAiFileAction, deleteAiFileAction } from '@/features/manage-ai-sources/api/aiSources';
+import {
+  readAiFileAction,
+  saveAiFileAction,
+  deleteAiFileAction,
+} from '@/features/manage-ai-sources/api/aiSources';
 import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
 import type { AiFile } from '@/entities/ai-source';
 import { Chevron } from '@/shared/ui/Chevron';
+import { Button } from '@/design_system/inputs';
+import { Badge } from '@/design_system/feedback';
 
 type Props = { file: AiFile; showSource?: string };
 
@@ -81,7 +87,7 @@ export function AiFileRow({ file, showSource }: Props) {
   };
 
   return (
-    <li className="border-border bg-panel flex flex-col gap-2 rounded-xl border p-4">
+    <li className="flex flex-col gap-2 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -92,53 +98,43 @@ export function AiFileRow({ file, showSource }: Props) {
           <span className="mt-0.5 shrink-0">
             <Chevron open={isOpen} size={16} />
           </span>
-          <span className="group-hover:text-accent min-w-0 font-mono text-sm break-all text-white">
+          <span className="min-w-0 font-mono text-sm break-all text-foreground group-hover:text-accent">
             {file.relativePath}
           </span>
         </button>
         {showSource && (
-          <span className="border-border text-muted rounded-full border px-2 py-0.5 font-mono text-[10px]">
+          <Badge variant="outline" className="font-mono text-[10px]">
             {showSource}
-          </span>
+          </Badge>
         )}
-        <span className="border-border text-muted rounded-full border px-2 py-0.5 font-mono text-[10px]">
+        <Badge variant="outline" className="font-mono text-[10px]">
           {file.ext.slice(1)}
-        </span>
-        <span className="text-muted font-mono text-[10px]">{formatBytes(file.size)}</span>
-        <span className="text-muted font-mono text-[10px]">
+        </Badge>
+        <span className="font-mono text-[10px] text-muted-foreground">{formatBytes(file.size)}</span>
+        <span className="font-mono text-[10px] text-muted-foreground">
           {new Date(file.mtime).toLocaleString()}
         </span>
-        <button
-          type="button"
-          onClick={remove}
-          disabled={isPending}
-          className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-300 transition hover:bg-red-500/20 disabled:opacity-50"
-        >
+        <Button type="button" variant="destructive" size="xs" onClick={remove} disabled={isPending}>
           Delete
-        </button>
+        </Button>
       </div>
       {isOpen && (
         <div className="flex flex-col gap-2">
           {isPending && draft === undefined ? (
-            <p className="text-muted text-[11px]">Loading…</p>
+            <p className="text-[11px] text-muted-foreground">Loading…</p>
           ) : (
             <textarea
               value={draft ?? ''}
               onChange={(e) => setDraft(key, e.target.value)}
               spellCheck={false}
               rows={Math.min(30, Math.max(8, (draft ?? '').split('\n').length + 2))}
-              className="border-border bg-bg focus:border-accent w-full resize-y rounded-lg border p-3 font-mono text-xs text-white outline-none"
+              className="w-full resize-y rounded-lg border bg-background p-3 font-mono text-xs text-foreground outline-none focus:border-accent"
             />
           )}
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={save}
-              disabled={isPending || draft === undefined}
-              className="border-accent bg-accent/20 hover:bg-accent/30 rounded-lg border px-3 py-1.5 text-xs text-white transition disabled:opacity-50"
-            >
+            <Button type="button" size="sm" onClick={save} disabled={isPending || draft === undefined}>
               {isPending ? 'Saving…' : 'Save'}
-            </button>
+            </Button>
           </div>
         </div>
       )}

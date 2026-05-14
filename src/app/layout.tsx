@@ -4,6 +4,7 @@ import { Nav } from '@/widgets/nav/ui/Nav';
 import { Sidebar } from '@/widgets/sidebar/ui/Sidebar';
 import { getSources } from '@/entities/ai-source';
 import { getActiveSourceId } from '@/entities/active-source';
+import { TooltipProvider } from '@/design_system/overlay';
 
 export const metadata: Metadata = {
   title: 'Claude Plugins Viewer',
@@ -15,11 +16,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased" suppressHydrationWarning>
-        <Nav />
-        <div className="flex min-h-[calc(100vh-57px)]">
-          <Sidebar sources={sources} activeId={activeId} />
-          <div className="min-w-0 flex-1">{children}</div>
-        </div>
+        <TooltipProvider delayDuration={200}>
+          <Nav />
+          <div className="flex min-h-[calc(100vh-57px)]">
+            <Sidebar sources={sources} activeId={activeId} />
+            <div className="min-w-0 flex-1">{children}</div>
+          </div>
+        </TooltipProvider>
       </body>
     </html>
   );

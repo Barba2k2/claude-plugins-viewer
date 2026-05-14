@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { update } from '@/features/plugin-actions/api/plugins';
 import { usePluginActionStore } from '@/features/plugin-actions/model/pluginActionStore';
+import { Button } from '@/design_system/inputs';
 
 type Props = { id: string };
 
@@ -39,14 +40,16 @@ export function UpdatePlugin({ id }: Props) {
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={handleClick}
         disabled={pending}
-        className="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs text-accent transition hover:bg-accent/20 disabled:opacity-50"
+        className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20"
       >
         {pending ? 'Updating…' : 'Update plugin'}
-      </button>
+      </Button>
       {error && (
         <pre className="max-h-32 max-w-md overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
           {error}
