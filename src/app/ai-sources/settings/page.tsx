@@ -1,10 +1,15 @@
 import path from 'node:path';
 import os from 'node:os';
 import { promises as fs } from 'node:fs';
-import { KNOWN_TOOLS, getSourcesConfig } from '@/entities/ai-source';
+import { ALL_TOOLS, KNOWN_TOOLS, getSourcesConfig } from '@/entities/ai-source';
 import { AutoDiscoveredSection } from '@/features/manage-ai-sources/ui/AutoDiscoveredSection';
 import { CustomSourcesSection } from '@/features/manage-ai-sources/ui/CustomSourcesSection';
 import { AddSourceForm } from '@/features/manage-ai-sources/ui/AddSourceForm';
+import {
+  CliDetectionSection,
+  type CliDetectionRowData,
+} from '@/features/manage-ai-sources/ui/CliDetectionSection';
+import { getCliStatus, getToolCliSpec, getPlatformInfo } from '@/shared/lib/platform';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,20 +69,42 @@ export default async function SettingsPage() {
     }),
   );
 
+  const platform = await getPlatformInfo();
+  const cliCapableTools = ALL_TOOLS.filter((tool) => getToolCliSpec(tool.id) !== null);
+  const cliRows: CliDetectionRowData[] = await Promise.all(
+    cliCapableTools.map(async (tool) => {
+      const status = await getCliStatus(tool.id);
+      const displayName = config.nameOverrides[tool.id] ?? tool.defaultName;
+      return {
+        toolId: tool.id,
+        displayName,
+        status,
+        hasOverride: !!config.cliOverrides[tool.id],
+      };
+    }),
+  );
+  const showWslControls = platform.os === 'win32';
+
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <header className="mb-8 flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-foreground">AI Sources Settings</h1>
-        <p className="text-sm text-muted-foreground">
-          Manage auto-discovered tools and add custom directories. Names default to UPPERCASE
-          folder name; custom names are shown as typed.
+        <h1 className="text-foreground text-2xl font-semibold">AI Sources Settings</h1>
+        <p className="text-muted-foreground text-sm">
+          Manage auto-discovered tools and add custom directories. Names default to UPPERCASE folder
+          name; custom names are shown as typed.
         </p>
       </header>
+
+      <CliDetectionSection
+        rows={cliRows}
+        showWslControls={showWslControls}
+        preferWsl={config.preferWsl}
+      />
 
       <AutoDiscoveredSection rows={defaultRows} />
 
       <section className="mb-10">
-        <h2 className="mb-3 text-xs uppercase tracking-wide text-muted-foreground">
+        <h2 className="text-muted-foreground mb-3 text-xs tracking-wide uppercase">
           Add custom source
         </h2>
         <AddSourceForm />
