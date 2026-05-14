@@ -4,6 +4,9 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { addCustomSourceAction } from '@/features/manage-ai-sources/api/aiSources';
 import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
+import { Button } from '@/design_system/inputs';
+import { Input } from '@/design_system/inputs';
+import { Card } from '@/design_system/layout';
 
 export function AddSourceForm() {
   const name = useAiSourcesStore((s) => s.addName);
@@ -36,37 +39,32 @@ export function AddSourceForm() {
   };
 
   return (
-    <form
-      onSubmit={submit}
-      className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4"
-    >
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Display name (optional)"
-          className="flex-1 rounded-lg border border-border bg-bg px-3 py-2 text-sm text-white outline-none focus:border-accent"
-        />
-        <input
-          type="text"
-          value={pathInput}
-          onChange={(e) => setPath(e.target.value)}
-          placeholder="~/.some-ai or absolute path"
-          className="flex-1 rounded-lg border border-border bg-bg px-3 py-2 font-mono text-sm text-white outline-none focus:border-accent"
-        />
-        <button
-          type="submit"
-          disabled={isPending || !pathInput.trim()}
-          className="rounded-lg border border-accent bg-accent/20 px-4 py-2 text-sm text-white transition hover:bg-accent/30 disabled:opacity-50"
-        >
-          {isPending ? 'Adding…' : 'Add source'}
-        </button>
-      </div>
-      <p className="text-[11px] text-muted">
-        If name is empty, folder name in UPPERCASE is used.
-      </p>
-      {error && <p className="text-[11px] text-red-300">{error}</p>}
-    </form>
+    <Card asChild className="gap-2 p-4">
+      <form onSubmit={submit}>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Display name (optional)"
+            className="flex-1"
+          />
+          <Input
+            type="text"
+            value={pathInput}
+            onChange={(e) => setPath(e.target.value)}
+            placeholder="~/.some-ai or absolute path"
+            className="flex-1 font-mono"
+          />
+          <Button type="submit" disabled={isPending || !pathInput.trim()}>
+            {isPending ? 'Adding…' : 'Add source'}
+          </Button>
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          If name is empty, folder name in UPPERCASE is used.
+        </p>
+        {error && <p className="text-[11px] text-red-300">{error}</p>}
+      </form>
+    </Card>
   );
 }

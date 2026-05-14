@@ -4,6 +4,7 @@ import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { uninstall } from '@/features/plugin-actions/api/plugins';
 import { usePluginActionStore } from '@/features/plugin-actions/model/pluginActionStore';
+import { Button } from '@/design_system/inputs';
 
 type Props = { id: string; name: string };
 
@@ -40,13 +41,14 @@ export function UninstallPlugin({ id, name }: Props) {
 
   if (!confirming) {
     return (
-      <button
+      <Button
         type="button"
+        variant="destructive"
+        size="sm"
         onClick={() => setConfirming(id, true)}
-        className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-xs text-red-300 transition hover:bg-red-500/20"
       >
         Uninstall plugin
-      </button>
+      </Button>
     );
   }
 
@@ -57,22 +59,24 @@ export function UninstallPlugin({ id, name }: Props) {
         <code className="mx-1 font-mono">claude plugin uninstall {id}</code>.
       </p>
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
+          variant="destructive"
+          size="sm"
           onClick={handleConfirm}
           disabled={pending}
-          className="rounded-md bg-red-500/30 px-3 py-1 text-xs text-white transition hover:bg-red-500/50 disabled:opacity-50"
         >
           {pending ? 'Uninstalling…' : 'Yes, uninstall'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => setConfirming(id, false)}
           disabled={pending}
-          className="rounded-md border border-border bg-bg px-3 py-1 text-xs text-muted transition hover:text-white"
         >
           Cancel
-        </button>
+        </Button>
       </div>
       {error && (
         <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded bg-red-900/40 p-2 text-[10px] text-red-200">

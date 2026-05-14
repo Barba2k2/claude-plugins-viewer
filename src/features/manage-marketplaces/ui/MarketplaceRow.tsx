@@ -2,9 +2,14 @@
 
 import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { removeMarketplaceAction, updateMarketplaceAction } from '@/features/manage-marketplaces/api/marketplaces';
+import {
+  removeMarketplaceAction,
+  updateMarketplaceAction,
+} from '@/features/manage-marketplaces/api/marketplaces';
 import { useMarketplaceStore } from '@/features/manage-marketplaces/model/marketplaceStore';
 import type { MarketplaceEntry } from '@/shared/lib/cli';
+import { Button } from '@/design_system/inputs';
+import { Badge } from '@/design_system/feedback';
 
 type Props = { entry: MarketplaceEntry };
 
@@ -67,53 +72,60 @@ export function MarketplaceRow({ entry }: Props) {
         : entry.source;
 
   return (
-    <li className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4">
+    <li className="flex flex-col gap-2 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-mono text-sm text-white">{entry.name}</h3>
-        <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted">
+        <h3 className="font-mono text-sm text-foreground">{entry.name}</h3>
+        <Badge variant="outline" className="font-mono text-[10px]">
           {sourceLabel}
-        </span>
+        </Badge>
         <div className="ml-auto flex flex-wrap gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="xs"
             onClick={handleUpdate}
             disabled={updatePending}
-            className="rounded-md border border-accent/40 bg-accent/10 px-2 py-1 text-[11px] text-accent transition hover:bg-accent/20 disabled:opacity-50"
+            className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20"
           >
             {updatePending ? 'Updating…' : 'Update'}
-          </button>
+          </Button>
           {!confirming ? (
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              size="xs"
               onClick={() => setConfirming(id, true)}
-              className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 text-[11px] text-red-300 transition hover:bg-red-500/20"
             >
               Remove
-            </button>
+            </Button>
           ) : (
             <div className="flex items-center gap-1">
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="xs"
                 onClick={handleRemove}
                 disabled={removePending}
-                className="rounded-md bg-red-500/30 px-2 py-1 text-[11px] text-white transition hover:bg-red-500/50 disabled:opacity-50"
               >
                 {removePending ? '…' : 'Confirm'}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="xs"
                 onClick={() => setConfirming(id, false)}
                 disabled={removePending}
-                className="rounded-md border border-border bg-bg px-2 py-1 text-[11px] text-muted transition hover:text-white"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
       </div>
       {entry.installLocation && (
-        <div className="break-all font-mono text-[10px] text-muted">{entry.installLocation}</div>
+        <div className="break-all font-mono text-[10px] text-muted-foreground">
+          {entry.installLocation}
+        </div>
       )}
       {updateError && (
         <pre className="max-h-24 overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">

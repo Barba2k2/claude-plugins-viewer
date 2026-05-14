@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTransition } from 'react';
 import { setActiveSourceAction } from '@/features/select-active-source/api/activeSource';
 import type { AiSource } from '@/entities/ai-source';
+import { Badge } from '@/design_system/feedback';
 
 type Props = { sources: AiSource[]; activeId: string };
 
@@ -22,13 +23,13 @@ export function Sidebar({ sources, activeId }: Props) {
   };
 
   return (
-    <aside className="w-60 shrink-0 border-r border-border bg-panel/40">
+    <aside className="w-60 shrink-0 border-r bg-card/40">
       <div className="sticky top-14.25 flex flex-col gap-1 p-4">
-        <div className="mb-1 px-3 text-[10px] uppercase tracking-wide text-muted">
+        <div className="mb-1 px-3 text-[10px] uppercase tracking-wide text-muted-foreground">
           Active source
         </div>
         {sources.length === 0 ? (
-          <p className="px-3 text-xs text-muted">No sources.</p>
+          <p className="px-3 text-xs text-muted-foreground">No sources.</p>
         ) : (
           sources.map((s) => {
             const active = s.id === activeId;
@@ -39,7 +40,9 @@ export function Sidebar({ sources, activeId }: Props) {
                 onClick={() => select(s.id)}
                 disabled={isPending}
                 className={`flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition disabled:opacity-60 ${
-                  active ? 'bg-panel text-white' : 'text-muted hover:bg-panel hover:text-white'
+                  active
+                    ? 'bg-card text-foreground'
+                    : 'text-muted-foreground hover:bg-card hover:text-foreground'
                 }`}
               >
                 <span className="flex min-w-0 items-center gap-2">
@@ -50,9 +53,9 @@ export function Sidebar({ sources, activeId }: Props) {
                   />
                   <span className="truncate">{s.name}</span>
                 </span>
-                <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 font-mono text-[9px] text-muted">
+                <Badge variant="outline" className="font-mono text-[9px]">
                   {s.kind === 'auto' ? 'auto' : 'custom'}
-                </span>
+                </Badge>
               </button>
             );
           })
@@ -62,8 +65,8 @@ export function Sidebar({ sources, activeId }: Props) {
           href="/ai-sources/settings"
           className={`mt-3 rounded-lg px-3 py-2 text-sm transition ${
             pathname === '/ai-sources/settings'
-              ? 'bg-panel text-white'
-              : 'text-muted hover:bg-panel hover:text-white'
+              ? 'bg-card text-foreground'
+              : 'text-muted-foreground hover:bg-card hover:text-foreground'
           }`}
         >
           Settings

@@ -1,6 +1,11 @@
 import { notFound } from 'next/navigation';
 import { getHookDetail } from '@/entities/resource';
 import { DetailHeader } from '@/widgets/detail-header/ui/DetailHeader';
+import { ToggleStatusBar } from '@/widgets/resource-detail/ui/ToggleStatusBar';
+import { StatGrid } from '@/widgets/resource-detail/ui/StatGrid';
+import { StatCard } from '@/widgets/resource-detail/ui/StatCard';
+import { CommandSection } from '@/widgets/resource-detail/ui/CommandSection';
+import { ScriptSourceSection } from '@/widgets/resource-detail/ui/ScriptSourceSection';
 import { ResourceToggle } from '@/features/toggle-resource/ui/ResourceToggle';
 
 export const dynamic = 'force-dynamic';
@@ -23,45 +28,21 @@ export default async function HookDetailPage({ params }: { params: Promise<{ id:
         description={record.matcher ? `Triggered when matcher = "${record.matcher}"` : undefined}
       />
 
-      <section className="mb-6 flex items-center justify-between rounded-xl border border-border bg-panel p-4">
-        <span className={`text-sm ${record.enabled ? 'text-white' : 'text-muted'}`}>
-          {record.enabled ? 'Enabled' : 'Disabled (stashed in viewer shadow)'}
-        </span>
-        <ResourceToggle kind="hook" id={record.id} enabled={record.enabled} size="md" />
-      </section>
+      <ToggleStatusBar
+        enabled={record.enabled}
+        label={record.enabled ? 'Enabled' : 'Disabled (stashed in viewer shadow)'}
+        toggle={<ResourceToggle kind="hook" id={record.id} enabled={record.enabled} size="md" />}
+      />
 
-      <section className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-        <Stat label="Event" value={record.event} />
-        <Stat label="Type" value={record.type} />
-        <Stat label="Matcher" value={record.matcher ?? '(any)'} />
-      </section>
+      <StatGrid cols={3}>
+        <StatCard label="Event" value={record.event} />
+        <StatCard label="Type" value={record.type} />
+        <StatCard label="Matcher" value={record.matcher ?? '(any)'} />
+      </StatGrid>
 
-      <section className="mb-6 rounded-xl border border-border bg-panel p-5">
-        <h2 className="mb-3 text-xs uppercase tracking-wide text-muted">Command</h2>
-        <code className="block break-all rounded-lg bg-bg p-3 font-mono text-xs text-white">
-          {record.command}
-        </code>
-      </section>
+      <CommandSection command={record.command} />
 
-      {scriptSource && (
-        <section className="rounded-xl border border-border bg-panel p-5">
-          <h2 className="mb-3 text-xs uppercase tracking-wide text-muted">
-            Script source ({scriptSource.split('\n').length} lines)
-          </h2>
-          <pre className="max-h-175 overflow-auto whitespace-pre-wrap rounded-lg bg-bg p-3 font-mono text-xs text-muted">
-            {scriptSource}
-          </pre>
-        </section>
-      )}
+      {scriptSource && <ScriptSourceSection source={scriptSource} />}
     </main>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-border bg-panel p-3">
-      <div className="text-[10px] uppercase tracking-wide text-muted">{label}</div>
-      <div className="mt-1 font-mono text-xs text-white">{value}</div>
-    </div>
   );
 }

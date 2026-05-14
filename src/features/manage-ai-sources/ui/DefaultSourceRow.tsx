@@ -8,6 +8,9 @@ import {
 } from '@/features/manage-ai-sources/api/aiSources';
 import type { KnownTool } from '@/entities/ai-source';
 import { useAiSourcesStore } from '@/features/manage-ai-sources/model/aiSourcesStore';
+import { Button } from '@/design_system/inputs';
+import { Input } from '@/design_system/inputs';
+import { Badge } from '@/design_system/feedback';
 
 type Props = {
   tool: KnownTool;
@@ -76,87 +79,85 @@ export function DefaultSourceRow({
   };
 
   return (
-    <li className="flex flex-col gap-2 rounded-xl border border-border bg-panel p-4">
+    <li className="flex flex-col gap-2 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-center gap-2">
         {editing ? (
-          <input
+          <Input
             type="text"
             value={nameInput}
             onChange={(e) => setDraft(tool.id, e.target.value)}
             placeholder={tool.defaultName}
-            className="flex-1 rounded-lg border border-border bg-bg px-2 py-1 text-sm text-white outline-none focus:border-accent"
+            className="flex-1"
             autoFocus
           />
         ) : (
-          <span className="flex-1 truncate text-sm font-medium text-white">
+          <span className="flex-1 truncate text-sm font-medium text-foreground">
             {displayName}
             {nameOverride && (
-              <span className="ml-2 text-[10px] text-muted">(was {tool.defaultName})</span>
+              <span className="ml-2 text-[10px] text-muted-foreground">
+                (was {tool.defaultName})
+              </span>
             )}
           </span>
         )}
-        <span
-          className={`rounded-full border px-2 py-0.5 font-mono text-[10px] ${
+        <Badge
+          variant="outline"
+          className={`font-mono text-[10px] ${
             disabled
-              ? 'border-border text-muted'
+              ? 'border-border text-muted-foreground'
               : exists
                 ? 'border-accent/40 text-accent'
                 : 'border-red-500/40 text-red-300'
           }`}
         >
           {disabled ? 'disabled' : exists ? `${fileCount} files` : 'missing'}
-        </span>
+        </Badge>
         {editing ? (
           <>
-            <button
+            <Button
               type="button"
+              size="xs"
               onClick={() => saveName(nameInput.trim() === '' ? null : nameInput)}
               disabled={isPending}
-              className="rounded-md border border-accent bg-accent/20 px-2 py-1 text-[11px] text-white transition hover:bg-accent/30 disabled:opacity-50"
             >
               Save
-            </button>
-            <button
-              type="button"
-              onClick={cancelEdit}
-              className="rounded-md border border-border bg-panel px-2 py-1 text-[11px] text-muted transition hover:text-white"
-            >
+            </Button>
+            <Button type="button" variant="ghost" size="xs" onClick={cancelEdit}>
               Cancel
-            </button>
+            </Button>
             {nameOverride && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="xs"
                 onClick={() => saveName(null)}
                 disabled={isPending}
-                className="rounded-md border border-border bg-panel px-2 py-1 text-[11px] text-muted transition hover:text-white disabled:opacity-50"
               >
                 Reset
-              </button>
+              </Button>
             )}
           </>
         ) : (
-          <button
-            type="button"
-            onClick={startEdit}
-            className="rounded-md border border-border bg-panel px-2 py-1 text-[11px] text-white transition hover:border-accent"
-          >
+          <Button type="button" variant="outline" size="xs" onClick={startEdit}>
             Rename
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           type="button"
+          variant={disabled ? 'outline' : 'ghost'}
+          size="xs"
           onClick={toggle}
           disabled={isPending}
-          className={`rounded-md border px-2 py-1 text-[11px] transition disabled:opacity-50 ${
+          className={
             disabled
               ? 'border-accent/40 bg-accent/10 text-accent hover:bg-accent/20'
-              : 'border-border bg-panel text-muted hover:text-white'
-          }`}
+              : undefined
+          }
         >
           {disabled ? 'Enable' : 'Disable'}
-        </button>
+        </Button>
       </div>
-      <p className="truncate font-mono text-[11px] text-muted">{resolvedPath}</p>
+      <p className="truncate font-mono text-[11px] text-muted-foreground">{resolvedPath}</p>
       {error && <p className="text-[11px] text-red-300">{error}</p>}
     </li>
   );
