@@ -44,10 +44,19 @@
 6. **[2026-05-13] `npm run dev` blocked by global PreToolUse hook on some setups (tmux requirement)**
    Do instead: bypass with `node node_modules/next/dist/bin/next dev -p 3737 > /tmp/cpv-dev.log 2>&1 &` then `echo $! > /tmp/cpv-dev.pid`. The hook regex only matches `npm|pnpm|yarn|bun run dev`, not direct binary invocation.
 
+7. **[2026-05-13] Bulk import rewrites during refactor use `perl -i -pe`**
+   Do instead: for moving files into new layout, batch substitutions with `find src -type f \( -name "*.ts" -o -name "*.tsx" \) -print0 | xargs -0 perl -i -pe 's{from (["\x27])\@/lib/foo\1}{from $1\@/entities/foo$1}g; ...'`. Use `\x27` for single quote inside `'...'` perl scripts. Quote-class `["\x27]` matches both quote styles.
+
+8. **[2026-05-13] `git mv` fails on untracked files (newly created same session)**
+   Do instead: use plain `mv` then `git add <new-path>` + `git add -u <old-path>`. Or batch: `git add src tsconfig.json && git add -u lib/ app/`. Rename detection during commit still picks up moves with ≥50% similarity.
+
 ## Next.js & React Patterns
 
-1. **[2026-05-13] App-wide context via cookie + server action + revalidatePath('/', 'layout')**
-   Do instead: for state that needs to flow into ALL Server Components (e.g. active AI source), store in cookie via server action, read via `cookies()` from `next/headers`. Call `revalidatePath('/', 'layout')` to re-render root layout + all children. Pattern in `lib/activeSource.ts` + `app/actions/activeSource.ts`.
+1. **[2026-05-13] Codebase is Feature-Sliced (`src/{app,widgets,features,entities,shared}`)**
+   Do instead: `@/*` maps to `./src/*` (see tsconfig). Cross-slice imports = absolute `@/entities/foo` / `@/features/foo/api/X`; same-slice siblings stay relative `./X`. Server actions live under `features/*/api/`, readers under `entities/*/api/`, Zustand under `features/*/model/`. Entities expose barrels at `index.ts`.
+
+2. **[2026-05-13] App-wide context via cookie + server action + revalidatePath('/', 'layout')**
+   Do instead: for state that needs to flow into ALL Server Components (e.g. active AI source), store in cookie via server action, read via `cookies()` from `next/headers`. Call `revalidatePath('/', 'layout')` to re-render root layout + all children. Pattern in `src/entities/active-source/` + `src/features/select-active-source/`.
 
 2. **[2026-05-13] Zustand selectors must return primitives, never derived arrays**
    Do instead: select stable scalars (`s.query`, `s.pluginFilter`, `s.sort`); do `.filter()`/`.sort()` inside `useMemo`. Returning `s.items.filter(...)` from the selector creates new array refs every render → infinite loop.
@@ -62,10 +71,13 @@
    Do instead: Server Component (`page.tsx`) fetches via `await getAll*()` and passes as prop to a `'use client'` component that uses Zustand for filter state. Don't try to call filesystem from inside a Client Component.
 
 6. **[2026-05-13] Path safety pattern for filesystem-backed multi-root readers**
-   Do instead: each source/root has its own `ensureWithinRoot(absPath, root)` that resolves both, checks `resolved.startsWith(root + path.sep)`, validates allowed extensions. See `lib/aiSources.ts:ensureWithinSource` for the multi-root variant.
+   Do instead: each source/root has its own `ensureWithinRoot(absPath, root)` that resolves both, checks `resolved.startsWith(root + path.sep)`, validates allowed extensions. See `src/entities/ai-source/api/aiSources.ts:ensureWithinSource`.
 
 7. **[2026-05-13] Long path overflow in flex card — `min-w-0` + `break-all`**
-   Do instead: flex children with `truncate` need parent `min-w-0` to truncate. For wrap-instead-of-truncate, swap `truncate` → `break-all` on the span. Applied in `app/ai-sources/AiFileRow.tsx`.
+   Do instead: flex children with `truncate` need parent `min-w-0` to truncate. For wrap-instead-of-truncate, swap `truncate` → `break-all` on the span. Applied in `src/features/manage-ai-sources/ui/AiFileRow.tsx`.
+
+8. **[2026-05-13] Sidebar persistent across all routes lives in root `app/layout.tsx`**
+   Do instead: don't add per-route layout sidebars (causes nesting/duplication). Render once in root layout passing `activeId` from server. Sub-layouts under `src/app/<route>/layout.tsx` should be passthrough (`return <>{children}</>;`).
 
 ## Plugin Data Format Gotchas
 
@@ -121,3 +133,12 @@
 
 7. **[2026-05-13] Caveman mode persists across turns once activated**
    Do instead: when user types `/caveman`, terse mode stays on for ALL subsequent responses until "stop caveman" or "normal mode". Drop temporarily for multi-step plans, destructive warnings, or clarification questions — resume immediately after.
+
+8. **[2026-05-13] "pode subir tbm" = explicit auth to commit/push items previously skipped**
+   Do instead: when user says this after a previous response where you flagged uncommitted items left out, commit + push those specific items now. Maps to: stage the exact files you mentioned, `git commit -m`, `git push`, verify `gh pr view N --json mergeStateStatus`.
+
+9. **[2026-05-13] Don't auto-commit pre-existing working-tree changes from previous sessions**
+   Do instead: at session start, `git status` may show modifications unrelated to current work (e.g. abandoned dep upgrade from another day). Don't include them in commits unless user explicitly authorizes. Surface them in summary so user can decide.
+
+10. **[2026-05-13] PR body format on this repo**
+    Do instead: `gh pr create --title "..." --body "$(cat <<'EOF' ... EOF)"`. NO test plan section. NO "Generated with Claude Code" trailer. Sections: `## Summary`, `## Notable files`, `## Conventions`. Single-line conventional-commit title.
