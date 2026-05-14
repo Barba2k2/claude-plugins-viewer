@@ -50,6 +50,12 @@
 8. **[2026-05-13] `git mv` fails on untracked files (newly created same session)**
    Do instead: use plain `mv` then `git add <new-path>` + `git add -u <old-path>`. Or batch: `git add src tsconfig.json && git add -u lib/ app/`. Rename detection during commit still picks up moves with ≥50% similarity.
 
+9. **[2026-05-13] zsh expands `[id]` even in destination paths — quote with `cp`/`mv`/heredoc tricks**
+   Do instead: writing dynamic route files like `src/app/agents/[id]/page.tsx` via shell needs double-quotes around the path: `cp /tmp/file.tsx "src/app/agents/[id]/page.tsx"`. Unquoted gives `zsh: no matches found`. Edit tool doesn't have this issue.
+
+10. **[2026-05-13] Tailwind 4 `@source` paths after FSD refactor**
+    Do instead: replace folder-specific `@source "../lib/**"` with path-agnostic `@source "../**/*.{ts,tsx}"` in `globals.css`. Otherwise Tailwind misses classes in files outside the hardcoded paths.
+
 ## Next.js & React Patterns
 
 1. **[2026-05-13] Codebase is Feature-Sliced (`src/{app,widgets,features,entities,shared}`)**
@@ -58,17 +64,14 @@
 2. **[2026-05-13] App-wide context via cookie + server action + revalidatePath('/', 'layout')**
    Do instead: for state that needs to flow into ALL Server Components (e.g. active AI source), store in cookie via server action, read via `cookies()` from `next/headers`. Call `revalidatePath('/', 'layout')` to re-render root layout + all children. Pattern in `src/entities/active-source/` + `src/features/select-active-source/`.
 
-2. **[2026-05-13] Zustand selectors must return primitives, never derived arrays**
+3. **[2026-05-13] Zustand selectors must return primitives, never derived arrays**
    Do instead: select stable scalars (`s.query`, `s.pluginFilter`, `s.sort`); do `.filter()`/`.sort()` inside `useMemo`. Returning `s.items.filter(...)` from the selector creates new array refs every render → infinite loop.
 
-3. **[2026-05-13] Browser extensions inject body attrs → React hydration mismatch**
+4. **[2026-05-13] Browser extensions inject body attrs → React hydration mismatch**
    Do instead: ColorZilla writes `cz-shortcut-listen="true"`, Grammarly writes `data-gramm`. Add `suppressHydrationWarning` to `<body>` in `app/layout.tsx`. Narrow scope — only this element's attribute diffs.
 
-4. **[2026-05-13] Listing-vs-detail data split: keep list payloads small**
+5. **[2026-05-13] Listing-vs-detail data split: keep list payloads small**
    Do instead: list reader returns `{id, name, description, ...}`; create separate `get*Detail(id)` that re-reads the file for body/markdown. Avoids shipping megabytes in the RSC payload for list routes.
-
-5. **[2026-05-13] Server Component → Client Component data plumbing**
-   Do instead: Server Component (`page.tsx`) fetches via `await getAll*()` and passes as prop to a `'use client'` component that uses Zustand for filter state. Don't try to call filesystem from inside a Client Component.
 
 6. **[2026-05-13] Path safety pattern for filesystem-backed multi-root readers**
    Do instead: each source/root has its own `ensureWithinRoot(absPath, root)` that resolves both, checks `resolved.startsWith(root + path.sep)`, validates allowed extensions. See `src/entities/ai-source/api/aiSources.ts:ensureWithinSource`.
@@ -78,6 +81,12 @@
 
 8. **[2026-05-13] Sidebar persistent across all routes lives in root `app/layout.tsx`**
    Do instead: don't add per-route layout sidebars (causes nesting/duplication). Render once in root layout passing `activeId` from server. Sub-layouts under `src/app/<route>/layout.tsx` should be passthrough (`return <>{children}</>;`).
+
+9. **[2026-05-13] shadcn on Tailwind 4 + theme bridge pattern**
+   Do instead: install with `npx shadcn@latest add <comp>` after configuring `components.json` with custom aliases (`"ui": "@/design_system/ui"`). shadcn uses unified `radix-ui` package (NOT `@radix-ui/react-X`). Add CSS variables to `@theme {}` in `globals.css`: declare `--color-background: var(--color-bg)`, `--color-primary: var(--color-accent)`, etc. — preserves legacy palette while shadcn components Just Work. `cn()` util at `src/shared/lib/cn.ts` re-exports `clsx + tailwind-merge`.
+
+10. **[2026-05-13] shadcn Card has no `asChild` — add Slot.Root if you need it**
+    Do instead: shadcn ships Card as a plain `<div>`. To render Card as a `<form>` (or any element), wrap with `radix-ui` Slot manually: import `Slot` from `radix-ui`, accept `asChild` prop, render `asChild ? Slot.Root : 'div'`. Pattern in `src/design_system/layout/Card.tsx`.
 
 ## Plugin Data Format Gotchas
 
@@ -116,8 +125,8 @@
 1. **[2026-05-13] Never use `useState` — always Zustand**
    Do instead: even local boolean state goes in a Zustand store. Selectors must be primitive (see Next.js & React Patterns #2). `useTransition` is fine (built-in React hook, not local state).
 
-2. **[2026-05-13] Never more than 1 component per file**
-   Do instead: each widget gets its own file (`AddSourceForm.tsx`, `CustomSourceRow.tsx`, `DefaultSourceRow.tsx`, etc.). Applies to ALL frameworks per project CLAUDE.md. Inline JSX compositions that represent distinct UI sections get extracted.
+2. **[2026-05-13] Never more than 1 component per file — applies to pages too**
+   Do instead: each widget gets its own file. Pages with multiple `<section>` blocks must split each into its own component file (e.g. `GlobalInstructionsSection.tsx`, `PerProjectSection.tsx`). Inline `function Foo() { ... }` helpers inside a `page.tsx`/`*.tsx` are violations — extract to siblings. Multi-component shadcn files (Card/Dialog/Tooltip) get split per subcomponent on first migration.
 
 3. **[2026-05-13] Only commit when explicitly asked; "continue" is not authorization**
    Do instead: words like "continue", "proceed", "go ahead" authorize WORK, not commits. Only commit on explicit "commit", "faça commits", "push".
