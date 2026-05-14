@@ -12,27 +12,52 @@ export type CustomSource = {
   path: string;
 };
 
+export type CliOverride = {
+  path: string;
+  useWsl?: boolean;
+};
+
 export type SourcesConfig = {
   customSources: CustomSource[];
   disabledDefaults: string[];
   nameOverrides: Record<string, string>;
+  cliOverrides: Record<string, CliOverride>;
+  preferWsl: boolean;
 };
 
 const EMPTY: SourcesConfig = {
   customSources: [],
   disabledDefaults: [],
   nameOverrides: {},
+  cliOverrides: {},
+  preferWsl: false,
 };
 
-function isValidConfig(value: unknown): value is SourcesConfig {
-  if (!value || typeof value !== 'object') return false;
-  const v = value as Record<string, unknown>;
+function isObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object';
+}
+
+function isValidConfig(value: unknown): value is Partial<SourcesConfig> {
+  if (!isObject(value)) return false;
   return (
-    Array.isArray(v.customSources) &&
-    Array.isArray(v.disabledDefaults) &&
-    typeof v.nameOverrides === 'object' &&
-    v.nameOverrides !== null
+    Array.isArray(value.customSources) &&
+    Array.isArray(value.disabledDefaults) &&
+    isObject(value.nameOverrides)
   );
+}
+
+function readCliOverrides(raw: unknown): Record<string, CliOverride> {
+  if (!isObject(raw)) return {};
+  const out: Record<string, CliOverride> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (!isObject(value)) continue;
+    if (typeof value.path !== 'string' || value.path.length === 0) continue;
+    out[key] = {
+      path: value.path,
+      useWsl: value.useWsl === true,
+    };
+  }
+  return out;
 }
 
 export async function getSourcesConfig(): Promise<SourcesConfig> {
@@ -41,7 +66,7 @@ export async function getSourcesConfig(): Promise<SourcesConfig> {
     const parsed = JSON.parse(raw);
     if (!isValidConfig(parsed)) return EMPTY;
     return {
-      customSources: parsed.customSources.filter(
+      customSources: (parsed.customSources ?? []).filter(
         (s): s is CustomSource =>
           !!s &&
           typeof s === 'object' &&
@@ -49,10 +74,14 @@ export async function getSourcesConfig(): Promise<SourcesConfig> {
           typeof (s as CustomSource).name === 'string' &&
           typeof (s as CustomSource).path === 'string',
       ),
-      disabledDefaults: parsed.disabledDefaults.filter((s): s is string => typeof s === 'string'),
+      disabledDefaults: (parsed.disabledDefaults ?? []).filter(
+        (s): s is string => typeof s === 'string',
+      ),
       nameOverrides: Object.fromEntries(
-        Object.entries(parsed.nameOverrides).filter(([, v]) => typeof v === 'string'),
+        Object.entries(parsed.nameOverrides ?? {}).filter(([, v]) => typeof v === 'string'),
       ) as Record<string, string>,
+      cliOverrides: readCliOverrides((parsed as Record<string, unknown>).cliOverrides),
+      preferWsl: (parsed as Record<string, unknown>).preferWsl === true,
     };
   } catch {
     return EMPTY;
@@ -124,6 +153,22 @@ export async function setDefaultDisabled(id: string, disabled: boolean): Promise
     ...config,
     disabledDefaults: [...current],
   });
+}
+
+export async function setCliOverride(toolId: string, override: CliOverride | null): Promise<void> {
+  const config = await getSourcesConfig();
+  const next = { ...config.cliOverrides };
+  if (override === null) {
+    delete next[toolId];
+  } else {
+    next[toolId] = { path: override.path, useWsl: override.useWsl === true };
+  }
+  await saveSourcesConfig({ ...config, cliOverrides: next });
+}
+
+export async function setPreferWsl(value: boolean): Promise<void> {
+  const config = await getSourcesConfig();
+  await saveSourcesConfig({ ...config, preferWsl: value });
 }
 
 export async function setDefaultName(id: string, name: string | null): Promise<void> {

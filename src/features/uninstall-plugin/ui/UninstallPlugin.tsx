@@ -6,9 +6,9 @@ import { uninstall } from '@/features/plugin-actions/api/plugins';
 import { usePluginActionStore } from '@/features/plugin-actions/model/pluginActionStore';
 import { Button } from '@/design_system/inputs';
 
-type Props = { id: string; name: string };
+type Props = { id: string; name: string; cliReady?: boolean };
 
-export function UninstallPlugin({ id, name }: Props) {
+export function UninstallPlugin({ id, name, cliReady = true }: Props) {
   const pendingMap = usePluginActionStore((s) => s.uninstallPending);
   const errorMap = usePluginActionStore((s) => s.uninstallError);
   const confirmingMap = usePluginActionStore((s) => s.confirmingUninstall);
@@ -46,6 +46,8 @@ export function UninstallPlugin({ id, name }: Props) {
         variant="destructive"
         size="sm"
         onClick={() => setConfirming(id, true)}
+        disabled={!cliReady}
+        title={!cliReady ? 'Configure Claude CLI in AI Sources settings first' : undefined}
       >
         Uninstall plugin
       </Button>
@@ -79,7 +81,7 @@ export function UninstallPlugin({ id, name }: Props) {
         </Button>
       </div>
       {error && (
-        <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded bg-red-900/40 p-2 text-[10px] text-red-200">
+        <pre className="max-h-32 overflow-auto rounded bg-red-900/40 p-2 text-[10px] whitespace-pre-wrap text-red-200">
           {error}
         </pre>
       )}
