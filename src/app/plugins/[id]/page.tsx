@@ -8,6 +8,7 @@ import { PluginCountsGrid } from '@/widgets/plugin-detail/ui/PluginCountsGrid';
 import { PluginResourcesGrid } from '@/widgets/plugin-detail/ui/PluginResourcesGrid';
 import { InstallInfoSection } from '@/widgets/plugin-detail/ui/InstallInfoSection';
 import { ReadmeSection } from '@/widgets/plugin-detail/ui/ReadmeSection';
+import { getCliStatus } from '@/shared/lib/platform';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,13 +20,16 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
   const plugin = await getPluginById(decoded);
   if (!plugin) return notFound();
 
-  const readme = plugin.hasReadme ? await readPluginReadme(plugin.installPath) : null;
+  const [readme, claudeCli] = await Promise.all([
+    plugin.hasReadme ? readPluginReadme(plugin.installPath) : Promise.resolve(null),
+    getCliStatus('claude'),
+  ]);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
       <Link
         href="/"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        className="text-muted-foreground hover:text-foreground mb-6 inline-flex items-center gap-2 text-sm"
       >
         ← Back to all plugins
       </Link>
@@ -33,8 +37,8 @@ export default async function PluginDetailPage({ params }: { params: Promise<Par
       <PluginHeader plugin={plugin} />
 
       <section className="mb-8 flex flex-wrap justify-end gap-3">
-        <UpdatePlugin id={plugin.id} />
-        <UninstallPlugin id={plugin.id} name={plugin.name} />
+        <UpdatePlugin id={plugin.id} cliReady={claudeCli.found} />
+        <UninstallPlugin id={plugin.id} name={plugin.name} cliReady={claudeCli.found} />
       </section>
 
       <PluginCountsGrid counts={plugin.counts} />
