@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 import {
   readAiFile,
   writeAiFile,
@@ -24,6 +25,7 @@ export type ActionResult<T = void> =
   | { success: false; error: string };
 
 function revalidate() {
+  ResourceCache.invalidate('sources');
   revalidatePath('/ai-sources');
   revalidatePath('/ai-sources/[id]', 'page');
   revalidatePath('/ai-sources/settings');

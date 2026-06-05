@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 import {
   setSkillEnabled,
   setAgentEnabled,
@@ -24,6 +25,7 @@ async function applyToggle(kind: Kind, id: string, enabled: boolean): Promise<Ac
     } else {
       await setCommandEnabled(parsed.pluginId, parsed.resourceName, enabled);
     }
+    ResourceCache.invalidate(`${kind}s`);
     revalidatePath(`/${kind}s`);
     revalidatePath(`/${kind}s/[id]`, 'page');
     revalidatePath('/');
@@ -52,6 +54,7 @@ export async function toggleHook(id: string, enabled: boolean): Promise<ActionRe
   try {
     if (enabled) await enableHook(parsed.pluginId, id);
     else await disableHook(parsed.pluginId, id);
+    ResourceCache.invalidate('hooks');
     revalidatePath('/hooks');
     revalidatePath('/hooks/[id]', 'page');
     revalidatePath('/');
