@@ -15,13 +15,15 @@ No test framework is configured; verify changes with `npm run lint` + `npm run b
 
 Next.js 15 App Router dashboard (React 19, TypeScript strict, Tailwind, Zustand) that introspects locally installed Claude Code plugins by reading the user's `~/.claude/plugins/` directory at request time. There is no database and no API layer — the filesystem _is_ the data source.
 
-**Data flow:** Server Components in `app/` call readers in `lib/plugins.ts` (`getPlugins`, `getPluginById`) and `lib/resources.ts` (`getSkills`, `getAgents`, `getCommands`, `getHooks`, `getMcps` and their `*ById` variants). These readers:
+The codebase follows Feature-Sliced Design under `src/` (`entities/`, `features/`, `widgets/`, `shared/`, `app/`).
+
+**Data flow:** Server Components in `src/app/` call readers in `src/entities/plugin/api/plugins.ts` (`getPlugins`, `getPluginById`) and `src/entities/resource/api/resources.ts` (`getAllSkills`, `getAllAgents`, `getAllCommands`, `getAllHooks`, `getAllMcps` and their `*Detail` variants). The AI-source readers live in `src/entities/ai-source/api/aiSources.ts` (`getSources`, `getSourceFiles`). These readers:
 
 1. Parse `~/.claude/plugins/installed_plugins.json` to enumerate installed plugins.
 2. For each plugin, walk its `installPath` to load `plugin.json`/`manifest.json`, README, and the per-resource directories (`skills/`, `agents/`, `commands/`, `hooks/`, `.mcp.json`).
 3. Return typed `PluginRecord` / `SkillRecord` / `AgentRecord` / `CommandRecord` / `HookRecord` / `McpRecord` shapes consumed directly by Server Components.
 
-Because reads happen per request, installing/uninstalling a plugin is reflected on page reload — do not cache plugin data across requests.
+**Caching:** The readers walk thousands of files, so they are memoized across requests by `ResourceCache` (`src/shared/lib/resourceCache.ts`) — a process-wide cache with a short TTL, keyed by tag (`plugins`, `skills`, `agents`, `commands`, `hooks`, `mcps`, `sources`). React's `cache()` only dedupes within one request; `ResourceCache` persists between navigations and server actions. Freshness is preserved by every mutation server action calling `ResourceCache.invalidate(<tag>)` (or `invalidateAll()` for install/uninstall) before `revalidatePath`. When adding a new mutation, invalidate the tags it affects.
 
 **Routing:** Each resource type has both a list page and a detail page:
 
@@ -30,7 +32,7 @@ Because reads happen per request, installing/uninstalling a plugin is reflected 
 - `app/{skills,agents,commands,hooks,mcps}/page.tsx` — flat lists across all plugins
 - `app/{agents,commands,hooks,mcps}/[id]/page.tsx` — resource detail pages
 
-**Client/Server split:** Route files are Server Components by default and call the `lib/` readers directly. Only files needing hooks, browser events, or Zustand opt into `'use client'` (e.g. `PluginGrid.tsx`, `FilterBar.tsx`, `Nav.tsx`). Filter/search/sort state lives in `lib/store.ts` (plugins) and `lib/resourceStore.ts` (other resources).
+**Client/Server split:** Route files are Server Components by default and call the `entities/*/api` readers directly. Only files needing hooks, browser events, or Zustand opt into `'use client'`. Filter/search/sort state lives in Zustand stores under `src/features/*/model/`.
 
 ## Conventions
 
