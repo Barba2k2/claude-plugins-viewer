@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { cache } from 'react';
 import { getSourcesConfig, type SourcesConfig } from './aiSourcesConfig';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 
 const HOME = os.homedir();
 
@@ -58,6 +58,19 @@ const SKIP_DIRS = new Set([
   'cache',
   'tmp',
   'logs',
+  // Claude runtime/vendor dirs — not user-authored config, and huge (plugins alone ~300k files).
+  'plugins',
+  'session-env',
+  'security',
+  'projects',
+  'sessions',
+  'graphify-out',
+  'shell-snapshots',
+  'file-history',
+  'backups',
+  'jobs',
+  'todos',
+  'statsig',
 ]);
 
 const SAFE_FILENAME = /^[a-zA-Z0-9_.-]+\.(md|json|toml)$/;
@@ -126,7 +139,9 @@ function resolveSource(
   return { id: override.id, name: override.name, path: override.path, kind: 'custom' };
 }
 
-export const getSources = cache(_getSources);
+export function getSources(): Promise<AiSource[]> {
+  return ResourceCache.wrap('sources', ['sources'], _getSources);
+}
 
 async function _getSources(): Promise<AiSource[]> {
   const config = await getSourcesConfig();
@@ -168,7 +183,11 @@ export async function getSourceById(id: string): Promise<AiSource | null> {
   return all.find((s) => s.id === id) ?? null;
 }
 
-export const getSourceFiles = cache(_getSourceFiles);
+export function getSourceFiles(sourceId: string): Promise<AiFile[]> {
+  return ResourceCache.wrap(`sourceFiles:${sourceId}`, ['sources'], () =>
+    _getSourceFiles(sourceId),
+  );
+}
 
 async function _getSourceFiles(sourceId: string): Promise<AiFile[]> {
   const source = await getSourceById(sourceId);
