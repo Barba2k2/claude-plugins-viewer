@@ -11,9 +11,9 @@ import type { MarketplaceEntry } from '@/shared/lib/cli';
 import { Button } from '@/design_system/inputs';
 import { Badge } from '@/design_system/feedback';
 
-type Props = { entry: MarketplaceEntry };
+type Props = { entry: MarketplaceEntry; cliReady?: boolean };
 
-export function MarketplaceRow({ entry }: Props) {
+export function MarketplaceRow({ entry, cliReady = true }: Props) {
   const id = entry.name;
 
   const removePending = useMarketplaceStore((s) => s.removePending[id] ?? false);
@@ -72,9 +72,9 @@ export function MarketplaceRow({ entry }: Props) {
         : entry.source;
 
   return (
-    <li className="flex flex-col gap-2 rounded-xl border bg-card p-4">
+    <li className="bg-card flex flex-col gap-2 rounded-xl border p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-mono text-sm text-foreground">{entry.name}</h3>
+        <h3 className="text-foreground font-mono text-sm">{entry.name}</h3>
         <Badge variant="outline" className="font-mono text-[10px]">
           {sourceLabel}
         </Badge>
@@ -84,7 +84,8 @@ export function MarketplaceRow({ entry }: Props) {
             variant="outline"
             size="xs"
             onClick={handleUpdate}
-            disabled={updatePending}
+            disabled={updatePending || !cliReady}
+            title={!cliReady ? 'Configure Claude CLI in AI Sources settings first' : undefined}
             className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20"
           >
             {updatePending ? 'Updating…' : 'Update'}
@@ -95,6 +96,8 @@ export function MarketplaceRow({ entry }: Props) {
               variant="destructive"
               size="xs"
               onClick={() => setConfirming(id, true)}
+              disabled={!cliReady}
+              title={!cliReady ? 'Configure Claude CLI in AI Sources settings first' : undefined}
             >
               Remove
             </Button>
@@ -123,18 +126,18 @@ export function MarketplaceRow({ entry }: Props) {
         </div>
       </div>
       {entry.installLocation && (
-        <div className="break-all font-mono text-[10px] text-muted-foreground">
+        <div className="text-muted-foreground font-mono text-[10px] break-all">
           {entry.installLocation}
         </div>
       )}
       {updateError && (
-        <pre className="max-h-24 overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
+        <pre className="max-h-24 overflow-auto rounded bg-red-900/30 p-2 text-[10px] whitespace-pre-wrap text-red-200">
           {updateError}
         </pre>
       )}
       {updateSuccess && <p className="text-[10px] text-green-400">{updateSuccess}</p>}
       {removeError && (
-        <pre className="max-h-24 overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
+        <pre className="max-h-24 overflow-auto rounded bg-red-900/30 p-2 text-[10px] whitespace-pre-wrap text-red-200">
           {removeError}
         </pre>
       )}

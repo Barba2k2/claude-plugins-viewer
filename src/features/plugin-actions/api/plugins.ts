@@ -3,10 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { setPluginEnabled } from '@/shared/lib/settings';
 import { installPlugin, uninstallPlugin, updatePlugin } from '@/shared/lib/cli';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
 function revalidatePluginPaths() {
+  ResourceCache.invalidateAll();
   revalidatePath('/');
   revalidatePath('/plugins/[id]', 'page');
   revalidatePath('/skills');
@@ -19,6 +21,7 @@ function revalidatePluginPaths() {
 export async function togglePlugin(id: string, enabled: boolean): Promise<ActionResult> {
   try {
     await setPluginEnabled(id, enabled);
+    ResourceCache.invalidate('plugins');
     revalidatePath('/');
     revalidatePath('/plugins/[id]', 'page');
     return { success: true };

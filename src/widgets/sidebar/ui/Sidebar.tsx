@@ -7,9 +7,15 @@ import { setActiveSourceAction } from '@/features/select-active-source/api/activ
 import type { AiSource } from '@/entities/ai-source';
 import { Badge } from '@/design_system/feedback';
 
-type Props = { sources: AiSource[]; activeId: string };
+export type PlatformBadgeInfo = {
+  prettyOs: string;
+  shell: string;
+  arch: string;
+};
 
-export function Sidebar({ sources, activeId }: Props) {
+type Props = { sources: AiSource[]; activeId: string; platform: PlatformBadgeInfo };
+
+export function Sidebar({ sources, activeId, platform }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
@@ -23,13 +29,13 @@ export function Sidebar({ sources, activeId }: Props) {
   };
 
   return (
-    <aside className="w-60 shrink-0 border-r bg-card/40">
+    <aside className="bg-card/40 w-60 shrink-0 border-r">
       <div className="sticky top-14.25 flex flex-col gap-1 p-4">
-        <div className="mb-1 px-3 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <div className="text-muted-foreground mb-1 px-3 text-[10px] tracking-wide uppercase">
           Active source
         </div>
         {sources.length === 0 ? (
-          <p className="px-3 text-xs text-muted-foreground">No sources.</p>
+          <p className="text-muted-foreground px-3 text-xs">No sources.</p>
         ) : (
           sources.map((s) => {
             const active = s.id === activeId;
@@ -71,6 +77,13 @@ export function Sidebar({ sources, activeId }: Props) {
         >
           Settings
         </Link>
+
+        <div
+          className="text-muted-foreground/70 mt-4 px-3 font-mono text-[10px] tracking-wide"
+          title={`${platform.prettyOs} · ${platform.shell} · ${platform.arch}`}
+        >
+          {platform.prettyOs} · {platform.shell} · {platform.arch}
+        </div>
       </div>
     </aside>
   );

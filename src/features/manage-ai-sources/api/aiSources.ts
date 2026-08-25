@@ -1,18 +1,23 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 import {
   readAiFile,
   writeAiFile,
   deleteAiFile,
   createAiFile,
-} from '@/entities/ai-source';
-import {
   addCustomSource,
   removeCustomSource,
   renameCustomSource,
   setDefaultDisabled,
   setDefaultName,
+  setCliOverride,
+  setPreferWsl,
+  rescanCli,
+  validateCliPath,
+  getAllCliStatuses,
+  type CliStatus,
 } from '@/entities/ai-source';
 
 export type ActionResult<T = void> =
@@ -20,6 +25,7 @@ export type ActionResult<T = void> =
   | { success: false; error: string };
 
 function revalidate() {
+  ResourceCache.invalidate('sources');
   revalidatePath('/ai-sources');
   revalidatePath('/ai-sources/[id]', 'page');
   revalidatePath('/ai-sources/settings');
@@ -51,10 +57,7 @@ export async function saveAiFileAction(
   }
 }
 
-export async function deleteAiFileAction(
-  sourceId: string,
-  absPath: string,
-): Promise<ActionResult> {
+export async function deleteAiFileAction(sourceId: string, absPath: string): Promise<ActionResult> {
   try {
     await deleteAiFile(sourceId, absPath);
     revalidate();
@@ -100,10 +103,7 @@ export async function removeCustomSourceAction(id: string): Promise<ActionResult
   }
 }
 
-export async function renameCustomSourceAction(
-  id: string,
-  name: string,
-): Promise<ActionResult> {
+export async function renameCustomSourceAction(id: string, name: string): Promise<ActionResult> {
   try {
     await renameCustomSource(id, name);
     revalidate();
@@ -126,14 +126,61 @@ export async function setDefaultDisabledAction(
   }
 }
 
-export async function setDefaultNameAction(
-  id: string,
-  name: string | null,
-): Promise<ActionResult> {
+export async function setDefaultNameAction(id: string, name: string | null): Promise<ActionResult> {
   try {
     await setDefaultName(id, name);
     revalidate();
     return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
+  }
+}
+
+export async function setCliOverrideAction(
+  toolId: string,
+  pathInput: string,
+  useWsl: boolean,
+): Promise<ActionResult<{ version: string }>> {
+  try {
+    const validation = await validateCliPath(toolId, pathInput, useWsl);
+    if (!validation.ok) return { success: false, error: validation.error };
+    await setCliOverride(toolId, { path: pathInput.trim(), useWsl });
+    rescanCli();
+    revalidate();
+    return { success: true, data: { version: validation.version } };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
+  }
+}
+
+export async function clearCliOverrideAction(toolId: string): Promise<ActionResult> {
+  try {
+    await setCliOverride(toolId, null);
+    rescanCli();
+    revalidate();
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
+  }
+}
+
+export async function setPreferWslAction(value: boolean): Promise<ActionResult> {
+  try {
+    await setPreferWsl(value);
+    rescanCli();
+    revalidate();
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
+  }
+}
+
+export async function rescanCliAction(): Promise<ActionResult<CliStatus[]>> {
+  try {
+    rescanCli();
+    const statuses = await getAllCliStatuses();
+    revalidate();
+    return { success: true, data: statuses };
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : 'unknown error' };
   }

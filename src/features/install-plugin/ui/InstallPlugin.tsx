@@ -8,7 +8,9 @@ import { Button } from '@/design_system/inputs';
 import { Input } from '@/design_system/inputs';
 import { Card } from '@/design_system/layout';
 
-export function InstallPlugin() {
+type Props = { cliReady?: boolean };
+
+export function InstallPlugin({ cliReady = true }: Props = {}) {
   const value = usePluginActionStore((s) => s.installInput);
   const pending = usePluginActionStore((s) => s.installPending);
   const error = usePluginActionStore((s) => s.installError);
@@ -44,10 +46,10 @@ export function InstallPlugin() {
     <Card asChild className="gap-2 p-4">
       <form onSubmit={handleSubmit}>
         <div className="flex flex-wrap items-center gap-2">
-          <label className="text-xs uppercase tracking-wide text-muted-foreground">
+          <label className="text-muted-foreground text-xs tracking-wide uppercase">
             Install plugin
           </label>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-muted-foreground text-[10px]">
             format: <code className="font-mono">name@marketplace</code>
           </span>
         </div>
@@ -58,14 +60,23 @@ export function InstallPlugin() {
             onChange={(e) => setValue(e.target.value)}
             placeholder="e.g. context7@claude-plugins-official"
             className="min-w-60 flex-1 font-mono"
-            disabled={pending}
+            disabled={pending || !cliReady}
           />
-          <Button type="submit" disabled={pending || !value.trim()}>
+          <Button
+            type="submit"
+            disabled={pending || !value.trim() || !cliReady}
+            title={!cliReady ? 'Configure Claude CLI in AI Sources settings first' : undefined}
+          >
             {pending ? 'Installing…' : 'Install'}
           </Button>
         </div>
+        {!cliReady && (
+          <p className="text-[11px] text-red-300/80">
+            Claude CLI not configured. Configure its path in AI Sources settings.
+          </p>
+        )}
         {error && (
-          <pre className="max-h-32 overflow-auto whitespace-pre-wrap rounded-lg bg-red-900/30 p-3 text-[11px] text-red-200">
+          <pre className="max-h-32 overflow-auto rounded-lg bg-red-900/30 p-3 text-[11px] whitespace-pre-wrap text-red-200">
             {error}
           </pre>
         )}

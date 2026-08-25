@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getMarketplaces } from '@/features/manage-marketplaces/api/marketplaces';
 import { getActiveSource } from '@/entities/active-source';
-import { CLAUDE_SOURCE_ID } from '@/entities/ai-source';
+import { CLAUDE_SOURCE_ID, getCliStatus } from '@/entities/ai-source';
 import { AddMarketplace } from '@/features/manage-marketplaces/ui/AddMarketplace';
 import { MarketplaceRow } from '@/features/manage-marketplaces/ui/MarketplaceRow';
 import { NonClaudeStub } from '@/widgets/non-claude-stub/ui/NonClaudeStub';
@@ -13,7 +13,7 @@ export default async function MarketplacesPage() {
   if (active.id !== CLAUDE_SOURCE_ID) {
     return <NonClaudeStub resource="Marketplaces" source={active} />;
   }
-  const marketplaces = await getMarketplaces();
+  const [marketplaces, claudeCli] = await Promise.all([getMarketplaces(), getCliStatus('claude')]);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
@@ -32,7 +32,7 @@ export default async function MarketplacesPage() {
       </header>
 
       <section className="mb-6">
-        <AddMarketplace />
+        <AddMarketplace cliReady={claudeCli.found} />
       </section>
 
       {marketplaces.length === 0 ? (
@@ -42,7 +42,7 @@ export default async function MarketplacesPage() {
       ) : (
         <ul className="flex flex-col gap-2">
           {marketplaces.map((m) => (
-            <MarketplaceRow key={m.name} entry={m} />
+            <MarketplaceRow key={m.name} entry={m} cliReady={claudeCli.found} />
           ))}
         </ul>
       )}

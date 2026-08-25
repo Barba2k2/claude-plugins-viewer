@@ -1,29 +1,13 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import { runCliTool, type CliResult } from '@/entities/ai-source';
 
-const runExecFile = promisify(execFile);
+export type { CliResult };
 
 const PLUGIN_SPEC_RE = /^[a-zA-Z0-9_.-]+(@[a-zA-Z0-9_.-]+)?$/;
 const MARKETPLACE_NAME_RE = /^[a-zA-Z0-9_.-]+$/;
 const MARKETPLACE_SOURCE_RE = /^[a-zA-Z0-9_.:/@~+-]+$/;
 
-export type CliResult =
-  | { success: true; stdout: string; stderr: string }
-  | { success: false; error: string };
-
-async function runClaude(args: string[]): Promise<CliResult> {
-  try {
-    const { stdout, stderr } = await runExecFile('claude', args, {
-      timeout: 120_000,
-      maxBuffer: 8 * 1024 * 1024,
-      env: { ...process.env, CI: '1' },
-    });
-    return { success: true, stdout, stderr };
-  } catch (e) {
-    const err = e as Error & { stdout?: string; stderr?: string };
-    const msg = err.stderr?.trim() || err.stdout?.trim() || err.message;
-    return { success: false, error: msg };
-  }
+function runClaude(args: string[]): Promise<CliResult> {
+  return runCliTool('claude', args);
 }
 
 export async function installPlugin(spec: string): Promise<CliResult> {

@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { cache } from 'react';
 import { getPluginById, getPlugins, type PluginRecord } from '@/entities/plugin';
 import { getDisabledMcps } from '@/shared/lib/settings';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 import { getShadowForPlugin, hookStableId } from '@/features/toggle-resource/api/hookToggle';
 
 export type SkillRecord = {
@@ -361,38 +361,48 @@ async function readMcpsFromPlugin(
   return out;
 }
 
-export const getAllSkills = cache(async (): Promise<SkillRecord[]> => {
-  const plugins = await getPlugins();
-  const all = (await Promise.all(plugins.map(readSkillsFromPlugin))).flat();
-  return all.sort((a, b) => a.name.localeCompare(b.name));
-});
+export function getAllSkills(): Promise<SkillRecord[]> {
+  return ResourceCache.wrap('skills', ['skills'], async () => {
+    const plugins = await getPlugins();
+    const all = (await Promise.all(plugins.map(readSkillsFromPlugin))).flat();
+    return all.sort((a, b) => a.name.localeCompare(b.name));
+  });
+}
 
-export const getAllAgents = cache(async (): Promise<AgentRecord[]> => {
-  const plugins = await getPlugins();
-  const all = (await Promise.all(plugins.map(readAgentsFromPlugin))).flat();
-  return all.sort((a, b) => a.name.localeCompare(b.name));
-});
+export function getAllAgents(): Promise<AgentRecord[]> {
+  return ResourceCache.wrap('agents', ['agents'], async () => {
+    const plugins = await getPlugins();
+    const all = (await Promise.all(plugins.map(readAgentsFromPlugin))).flat();
+    return all.sort((a, b) => a.name.localeCompare(b.name));
+  });
+}
 
-export const getAllCommands = cache(async (): Promise<CommandRecord[]> => {
-  const plugins = await getPlugins();
-  const all = (await Promise.all(plugins.map(readCommandsFromPlugin))).flat();
-  return all.sort((a, b) => a.name.localeCompare(b.name));
-});
+export function getAllCommands(): Promise<CommandRecord[]> {
+  return ResourceCache.wrap('commands', ['commands'], async () => {
+    const plugins = await getPlugins();
+    const all = (await Promise.all(plugins.map(readCommandsFromPlugin))).flat();
+    return all.sort((a, b) => a.name.localeCompare(b.name));
+  });
+}
 
-export const getAllHooks = cache(async (): Promise<HookRecord[]> => {
-  const plugins = await getPlugins();
-  const all = (await Promise.all(plugins.map(readHooksFromPlugin))).flat();
-  return all.sort(
-    (a, b) => a.event.localeCompare(b.event) || a.pluginName.localeCompare(b.pluginName),
-  );
-});
+export function getAllHooks(): Promise<HookRecord[]> {
+  return ResourceCache.wrap('hooks', ['hooks'], async () => {
+    const plugins = await getPlugins();
+    const all = (await Promise.all(plugins.map(readHooksFromPlugin))).flat();
+    return all.sort(
+      (a, b) => a.event.localeCompare(b.event) || a.pluginName.localeCompare(b.pluginName),
+    );
+  });
+}
 
-export const getAllMcps = cache(async (): Promise<McpRecord[]> => {
-  const plugins = await getPlugins();
-  const disabledSet = new Set(await getDisabledMcps());
-  const all = (await Promise.all(plugins.map((p) => readMcpsFromPlugin(p, disabledSet)))).flat();
-  return all.sort((a, b) => a.name.localeCompare(b.name));
-});
+export function getAllMcps(): Promise<McpRecord[]> {
+  return ResourceCache.wrap('mcps', ['mcps'], async () => {
+    const plugins = await getPlugins();
+    const disabledSet = new Set(await getDisabledMcps());
+    const all = (await Promise.all(plugins.map((p) => readMcpsFromPlugin(p, disabledSet)))).flat();
+    return all.sort((a, b) => a.name.localeCompare(b.name));
+  });
+}
 
 export async function getSkillDetail(
   id: string,

@@ -3,6 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { cache } from 'react';
 import { getEnabledMap } from '@/shared/lib/settings';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 
 export type InstalledEntry = {
   scope: string;
@@ -127,7 +128,9 @@ async function countHooks(installPath: string): Promise<{ count: number; names: 
   return { count: entries.length, names: entries };
 }
 
-export const getPlugins = cache(_getPlugins);
+export function getPlugins(): Promise<PluginRecord[]> {
+  return ResourceCache.wrap('plugins', ['plugins'], _getPlugins);
+}
 
 async function _getPlugins(): Promise<PluginRecord[]> {
   const installed = await readJson<{ plugins: Record<string, InstalledEntry[]> }>(INSTALLED_JSON);

@@ -2,12 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import { setMcpEnabled } from '@/shared/lib/settings';
+import { ResourceCache } from '@/shared/lib/resourceCache';
 
 export type ToggleResult = { success: true } | { success: false; error: string };
 
 export async function toggleMcp(name: string, enabled: boolean): Promise<ToggleResult> {
   try {
     await setMcpEnabled(name, enabled);
+    ResourceCache.invalidate('mcps');
     revalidatePath('/mcps');
     revalidatePath('/mcps/[id]', 'page');
     revalidatePath('/plugins/[id]', 'page');

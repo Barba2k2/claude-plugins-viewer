@@ -6,9 +6,9 @@ import { update } from '@/features/plugin-actions/api/plugins';
 import { usePluginActionStore } from '@/features/plugin-actions/model/pluginActionStore';
 import { Button } from '@/design_system/inputs';
 
-type Props = { id: string };
+type Props = { id: string; cliReady?: boolean };
 
-export function UpdatePlugin({ id }: Props) {
+export function UpdatePlugin({ id, cliReady = true }: Props) {
   const pendingMap = usePluginActionStore((s) => s.updatePending);
   const errorMap = usePluginActionStore((s) => s.updateError);
   const successMap = usePluginActionStore((s) => s.updateSuccess);
@@ -45,13 +45,14 @@ export function UpdatePlugin({ id }: Props) {
         variant="outline"
         size="sm"
         onClick={handleClick}
-        disabled={pending}
+        disabled={pending || !cliReady}
+        title={!cliReady ? 'Configure Claude CLI in AI Sources settings first' : undefined}
         className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20"
       >
         {pending ? 'Updating…' : 'Update plugin'}
       </Button>
       {error && (
-        <pre className="max-h-32 max-w-md overflow-auto whitespace-pre-wrap rounded bg-red-900/30 p-2 text-[10px] text-red-200">
+        <pre className="max-h-32 max-w-md overflow-auto rounded bg-red-900/30 p-2 text-[10px] whitespace-pre-wrap text-red-200">
           {error}
         </pre>
       )}
